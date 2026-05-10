@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Playwright / debug
+.playwright-mcp/
+*.png
+login-screen.png
+app-after-fix.png
+
+# Supabase temp
+supabase/.temp/
+
+# Archivos de trabajo
+Archivo.zip
+mock_rules.txt
+project_context.md
+
+# Seeds / migraciones internas (opcionales — comentar si quieres incluirlos)
+# seed_migrantes.sql
+# seed_synthetic.sql
