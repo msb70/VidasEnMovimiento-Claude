@@ -565,21 +565,32 @@ function viewDashboard(container) {
       <div id="trazabilidad-banner" style="background:linear-gradient(135deg,#0D1B36 0%,#1e3a8a 100%);border-radius:14px;padding:20px 24px;margin-bottom:20px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;">
         <div>
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#93C5FD;margin-bottom:6px;">Impacto de red — Trazabilidad de trayectorias</div>
-          <div style="font-size:15px;font-weight:600;color:#fff;line-height:1.4;">
-            <span style="color:#FCD34D;font-weight:800;">2.917 NNA</span> acompañados en más de un punto de atención &nbsp;·&nbsp;
-            <span style="color:#86EFAC;font-weight:800;">1.945 NNA</span> en un solo punto
+          <div id="trazabilidad-banner-texto" style="font-size:15px;font-weight:600;color:#fff;line-height:1.4;">
+            <span style="color:#FCD34D;font-weight:800;">${(ms.nnaMultiplesPuntos||2917).toLocaleString('es')} NNA</span> acompañados en más de un punto de atención &nbsp;·&nbsp;
+            <span style="color:#86EFAC;font-weight:800;">${(ms.nnaUnicoPunto||1945).toLocaleString('es')} NNA</span> en un solo punto
           </div>
-          <div style="font-size:12px;color:#94A3B8;margin-top:6px;font-style:italic;">"Vidas en Movimiento acompaña trayectorias, no solo registra casos"</div>
+          <div style="font-size:12px;color:#94A3B8;margin-top:5px;">
+            <span style="color:#C4B5FD;font-weight:700;">${(ms.atencionesCumuladas||7779).toLocaleString('es')} atenciones acumuladas</span>
+            &nbsp;·&nbsp;
+            <span style="color:#A5F3FC;font-weight:700;">${ms.femVsOtras?.fem||85}% atendidos por FEM</span>
+            &nbsp;·&nbsp;
+            <span style="font-style:italic;">"Vidas en Movimiento acompaña trayectorias, no solo registra casos"</span>
+          </div>
         </div>
         <div style="display:flex;gap:16px;flex-shrink:0;">
           <div style="text-align:center;">
-            <div style="font-size:30px;font-weight:800;color:#FCD34D;line-height:1;">60%</div>
+            <div id="trazabilidad-pct-multi" style="font-size:30px;font-weight:800;color:#FCD34D;line-height:1;">${ms.pctMultiplesPuntos||60}%</div>
             <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Múltiples<br>puntos</div>
           </div>
           <div style="width:1px;background:rgba(255,255,255,.15);"></div>
           <div style="text-align:center;">
-            <div style="font-size:30px;font-weight:800;color:#86EFAC;line-height:1;">40%</div>
-            <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Un solo<br>punto</div>
+            <div style="font-size:30px;font-weight:800;color:#C4B5FD;line-height:1;">${(ms.atencionesCumuladas||7779).toLocaleString('es')}</div>
+            <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Atenciones<br>acum.</div>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,.15);"></div>
+          <div style="text-align:center;">
+            <div style="font-size:30px;font-weight:800;color:#A5F3FC;line-height:1;">${ms.femVsOtras?.fem||85}%</div>
+            <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Red<br>FEM</div>
           </div>
         </div>
       </div>
@@ -859,12 +870,14 @@ function actualizarDashboard() {
   set('kpi-trazabilidad', pctT + '%');
 
   // Actualizar banner de trazabilidad
-  const banner = document.getElementById('trazabilidad-banner');
-  if (banner) {
-    banner.querySelector('div > div:nth-child(2)').innerHTML = `
+  const bannerTexto = document.getElementById('trazabilidad-banner-texto');
+  if (bannerTexto) {
+    bannerTexto.innerHTML = `
       <span style="color:#FCD34D;font-weight:800;">${mult.toLocaleString('es')} NNA</span> acompañados en más de un punto de atención &nbsp;·&nbsp;
       <span style="color:#86EFAC;font-weight:800;">${unico.toLocaleString('es')} NNA</span> en un solo punto`;
   }
+  const pctMultiEl = document.getElementById('trazabilidad-pct-multi');
+  if (pctMultiEl) pctMultiEl.textContent = pctT + '%';
 
   // Actualizar badges de porcentaje
   const badgeNi = document.getElementById('kpi-ninos-pct');
@@ -3028,121 +3041,151 @@ window.toggleMapaVista = function(vista) {
 
 function viewMapaMigrantes(container) {
   withLoader(container, () => {
-    const orgs  = AppState.organizaciones || [];
-    const nacs  = AppState.catalogos.nacionalidades || [];
-    const paises= AppState.catalogos.paises || [];
-
-    const todos = getVisibleMigrantes();
-    const kpiTotal     = todos.length;
-    const kpiTransito  = todos.filter(m => m.estado === 'en_transito').length;
-    const kpiAtendido  = todos.filter(m => m.estado === 'atendido').length;
-    const kpiDerivado  = todos.filter(m => m.estado === 'derivado').length;
-    const kpiUbicado   = todos.filter(m => m.estado === 'ubicado').length;
-    const kpiPaises    = new Set(todos.map(m => m.paisActualId || m.paisEntrevistaId).filter(Boolean)).size;
+    const ms          = AppState.mockStats;
+    const ciudadesData= ms.distribucionCiudadesFEM || [];
+    const migrantes   = getVisibleMigrantes();
+    const kpiTotal    = ms.totalRegistros || 4862;
+    const kpiAtencion = ms.atencionesCumuladas || 7779;
+    const kpiMulti    = ms.nnaMultiplesPuntos || 2917;
+    const kpiUnico    = ms.nnaUnicoPunto || 1945;
+    const femPct      = ms.femVsOtras?.fem || 85;
 
     container.innerHTML = `
       <div class="page-header">
-        <div><h1 class="page-title">Mapa de Rutas</h1>
-        <p class="page-subtitle">Localidades de registro · <span id="mapa-subtitle-count">${kpiTotal.toLocaleString('es')}</span> NNA visibles</p></div>
+        <div>
+          <h1 class="page-title">Mapa de Rutas Migratorias</h1>
+          <p class="page-subtitle">Red territorial FEM · Colombia y Venezuela · ${kpiTotal.toLocaleString('es')} NNA registrados</p>
+        </div>
         <div class="page-actions">
-          <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosMapa()">✕ Limpiar filtros</button>
+          <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosRutas()">✕ Limpiar filtros</button>
         </div>
       </div>
 
       <!-- KPI Cards -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:14px;" id="mapa-kpi-row">
-        <div class="card" style="padding:14px 16px;text-align:center;">
-          <div style="font-size:22px;font-weight:800;color:#1A2B4B;" id="kpi-total">${kpiTotal.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Total NNA</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px;">
+        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #1A2B4B;">
+          <div style="font-size:22px;font-weight:800;color:#1A2B4B;">${kpiTotal.toLocaleString('es')}</div>
+          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">NNA Registrados</div>
+        </div>
+        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #2563EB;">
+          <div style="font-size:22px;font-weight:800;color:#2563EB;">${kpiAtencion.toLocaleString('es')}</div>
+          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Atenciones Acum.</div>
         </div>
         <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #F59E0B;">
-          <div style="font-size:22px;font-weight:800;color:#D97706;" id="kpi-transito">${kpiTransito.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">En tránsito</div>
+          <div style="font-size:22px;font-weight:800;color:#D97706;">${kpiMulti.toLocaleString('es')}</div>
+          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Múltiples puntos</div>
         </div>
-        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #3B82F6;">
-          <div style="font-size:22px;font-weight:800;color:#2563EB;" id="kpi-atendido">${kpiAtendido.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Atendidos</div>
+        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #64748B;">
+          <div style="font-size:22px;font-weight:800;color:#475569;">${kpiUnico.toLocaleString('es')}</div>
+          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Un solo punto</div>
         </div>
-        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #8B5CF6;">
-          <div style="font-size:22px;font-weight:800;color:#7C3AED;" id="kpi-derivado">${kpiDerivado.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Derivados</div>
-        </div>
-        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #10B981;">
-          <div style="font-size:22px;font-weight:800;color:#059669;" id="kpi-ubicado">${kpiUbicado.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Ubicados</div>
-        </div>
-        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #6366F1;">
-          <div style="font-size:22px;font-weight:800;color:#4F46E5;" id="kpi-paises">${kpiPaises}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Países</div>
+        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #7C3AED;">
+          <div style="font-size:22px;font-weight:800;color:#7C3AED;">${femPct}%</div>
+          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Atendidos por FEM</div>
         </div>
       </div>
 
-      <!-- Fila de filtros -->
+      <!-- Filtros -->
       <div class="card" style="padding:14px 18px;margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Filtros del mapa</div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-          <div style="flex:1;min-width:160px;">
-            <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Estado</div>
-            <select class="form-control" id="mapa-filtro-estado" onchange="filtrarMapaMigrantes()" style="font-size:13px;">
-              <option value="">Todos</option>
-              <option value="en_transito">En tránsito</option>
-              <option value="atendido">Atendido</option>
-              <option value="derivado">Derivado</option>
-              <option value="ubicado">Ubicado</option>
+          <div style="flex:2;min-width:240px;">
+            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">🧒 Filtrar por NNA — ver ruta individual</div>
+            <select class="form-control" id="ruta-filtro-nna" onchange="renderRutasMapa()" style="font-size:13px;">
+              <option value="">— Todos los NNA —</option>
+              ${migrantes.map(m=>`<option value="${m.id}">${m.nombres} ${m.apellidos}</option>`).join('')}
             </select>
           </div>
           <div style="flex:2;min-width:200px;">
-            <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Organización</div>
-            <select class="form-control" id="mapa-filtro-org" onchange="filtrarMapaMigrantes()" style="font-size:13px;">
-              <option value="">Todas las organizaciones</option>
-              ${orgs.map(o=>`<option value="${o.id}">${paises.find(p=>p.id===o.paisId)?.bandera||''} ${o.nombre}</option>`).join('')}
-            </select>
-          </div>
-          <div style="flex:1;min-width:150px;">
-            <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Rango de edad</div>
-            <select class="form-control" id="mapa-filtro-edad" onchange="filtrarMapaMigrantes()" style="font-size:13px;">
-              <option value="">Todas las edades</option>
-              <option value="0-5">0 – 5 años</option>
-              <option value="6-10">6 – 10 años</option>
-              <option value="11-14">11 – 14 años</option>
-              <option value="15-17">15 – 17 años</option>
+            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">📍 Filtrar por ciudad</div>
+            <select class="form-control" id="ruta-filtro-ciudad" onchange="renderRutasMapa()" style="font-size:13px;">
+              <option value="">— Todas las ciudades —</option>
+              ${ciudadesData.map(c=>`<option value="${c.ciudadId}">${c.label} — ${c.nnaUnicos.toLocaleString('es')} NNA</option>`).join('')}
             </select>
           </div>
           <div style="flex:1;min-width:160px;">
-            <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Nacionalidad</div>
-            <select class="form-control" id="mapa-filtro-nac" onchange="filtrarMapaMigrantes()" style="font-size:13px;">
-              <option value="">Todas</option>
-              ${nacs.map(n=>`<option value="${n.id}">${n.label}</option>`).join('')}
-            </select>
-          </div>
-          <div style="flex:1;min-width:160px;">
-            <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">País de procedencia</div>
-            <select class="form-control" id="mapa-filtro-procedencia" onchange="filtrarMapaMigrantes()" style="font-size:13px;">
-              <option value="">Todos</option>
-              ${paises.map(p=>`<option value="${p.id}">${p.bandera||''} ${p.label}</option>`).join('')}
+            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">🗺️ Modo de vista</div>
+            <select class="form-control" id="ruta-modo" onchange="renderRutasMapa()" style="font-size:13px;">
+              <option value="rutas">Rutas + Ciudades</option>
+              <option value="puntos">Solo puntos actuales</option>
             </select>
           </div>
         </div>
-        <div id="mapa-conteo-badge" style="margin-top:10px;font-size:12px;color:#64748B;"></div>
+        <div id="ruta-conteo-badge" style="margin-top:10px;font-size:12px;color:#64748B;min-height:18px;"></div>
       </div>
 
-      <div class="card" style="padding:0;overflow:hidden;">
-        <div id="map-migrantes" style="height:540px;"></div>
+      <!-- Mapa -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
+        <div id="map-rutas" style="height:560px;"></div>
+      </div>
+
+      <!-- Tabla distribución por ciudad -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Distribución por Ciudad — Red FEM</div>
+            <div class="card-subtitle">Estimación técnica conservadora por ponderación territorial · Corte abril 2026</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" style="min-width:640px;">
+            <thead>
+              <tr>
+                <th>Oficina FEM</th>
+                <th>País</th>
+                <th style="text-align:right;">NNA Únicos</th>
+                <th style="text-align:right;">Atenciones</th>
+                <th style="text-align:right;">Multi-punto</th>
+                <th style="text-align:right;">% Red</th>
+                <th style="min-width:120px;">Cobertura</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ciudadesData.map(c=>`
+                <tr>
+                  <td><strong>${c.label}</strong></td>
+                  <td><span class="badge badge-gray">${c.paisLabel}</span></td>
+                  <td style="text-align:right;font-weight:700;color:#1A2B4B;">${c.nnaUnicos.toLocaleString('es')}</td>
+                  <td style="text-align:right;color:#2563EB;font-weight:600;">${c.atenciones.toLocaleString('es')}</td>
+                  <td style="text-align:right;color:#7C3AED;">${c.multiPunto.toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:700;">${c.pct}%</td>
+                  <td>
+                    <div style="background:#F1F5F9;border-radius:20px;height:6px;overflow:hidden;">
+                      <div style="background:#2563EB;height:100%;width:${c.pct * 5}%;border-radius:20px;max-width:100%;"></div>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+              <tr style="background:#F8FAFC;">
+                <td colspan="2"><strong>TOTAL RED FEM</strong></td>
+                <td style="text-align:right;font-weight:800;color:#1A2B4B;">${(4862).toLocaleString('es')}</td>
+                <td style="text-align:right;font-weight:800;color:#2563EB;">${(7779).toLocaleString('es')}</td>
+                <td style="text-align:right;font-weight:800;color:#7C3AED;">${(2917).toLocaleString('es')}</td>
+                <td style="text-align:right;font-weight:800;">100%</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:12px 16px;background:#EFF6FF;border-top:1px solid #DBEAFE;display:flex;gap:24px;flex-wrap:wrap;">
+          <div style="font-size:12px;color:#1D4ED8;"><strong>85%</strong> de los NNA atendidos por oficinas FEM · <strong>15%</strong> por organizaciones aliadas de la red</div>
+          <div style="font-size:12px;color:#64748B;">Supuesto conservador: 40% con 1 punto · 60% con 2 puntos de atención</div>
+        </div>
       </div>
     `;
 
-    setTimeout(() => renderBannerFiltroOrg(), 50);
     setTimeout(() => {
-      const map = L.map('map-migrantes', { zoomControl: true, scrollWheelZoom: false })
-        .setView([12, -82], 4);
+      const map = L.map('map-rutas', { zoomControl: true, scrollWheelZoom: false })
+        .setView([7.5, -71.5], 5);
       currentMapInstance = map;
+      window._mapaRutasInstance = map;
+      window._mapaRutasLayers  = {};
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap', maxZoom: 18
       }).addTo(map);
 
-      window._mapaMigrantesInstance = map;
-      window._mapaMigrantesLayer = null;
-      renderMarcadoresMigrantes(map);
+      renderRutasMapa();
     }, 100);
   });
 }
@@ -3375,6 +3418,243 @@ function buscarEnMapa() {
 function limpiarMapaBusqueda() {
   document.getElementById('search-mapa').value = '';
   showToast('Búsqueda limpiada', 'success');
+}
+
+// ─── MAPA DE RUTAS: renderizado y filtros ─────────────────────────
+
+function renderRutasMapa() {
+  const map = window._mapaRutasInstance;
+  if (!map) return;
+
+  // Limpiar capas previas
+  const layers = window._mapaRutasLayers || {};
+  Object.values(layers).forEach(l => { try { map.removeLayer(l); } catch(e){} });
+  window._mapaRutasLayers = {};
+
+  const nnaF    = (document.getElementById('ruta-filtro-nna')    || {}).value || '';
+  const ciudadF = (document.getElementById('ruta-filtro-ciudad') || {}).value || '';
+  const modo    = (document.getElementById('ruta-modo')          || {}).value || 'rutas';
+
+  const ms           = AppState.mockStats;
+  const ciudadesData = ms.distribucionCiudadesFEM || [];
+  const migrantes    = getVisibleMigrantes();
+
+  // Helper: añadir capa registrada
+  function addLayer(key, layer) {
+    layer.addTo(map);
+    window._mapaRutasLayers[key] = layer;
+    return layer;
+  }
+
+  // ── 1. Nodos FEM (modo rutas, sin NNA seleccionado) ──
+  if (modo === 'rutas' && !nnaF) {
+    ciudadesData.forEach((c, i) => {
+      const coords = _MAP_COORDS[c.ciudadId];
+      if (!coords) return;
+      const isSel  = ciudadF === c.ciudadId;
+      const radio  = Math.max(14, Math.min(8 + Math.round(Math.sqrt(c.nnaUnicos) * 0.6), 40));
+      const color  = isSel ? '#DC2626' : '#1A2B4B';
+
+      const circle = L.circleMarker(coords, {
+        radius: radio, fillColor: color, color: '#fff',
+        weight: isSel ? 3 : 2, opacity: 1, fillOpacity: isSel ? 1 : 0.85,
+      });
+      circle.bindPopup(`<div style="font-family:Inter,sans-serif;min-width:200px;">
+        <b style="font-size:14px;color:#1A2B4B;">📍 ${c.label}</b>
+        <p style="font-size:11px;color:#64748B;margin:3px 0 8px;">${c.paisLabel}</p>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#64748B;">NNA únicos:</span>
+            <strong style="color:#1A2B4B;">${c.nnaUnicos.toLocaleString('es')}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#64748B;">Atenciones:</span>
+            <strong style="color:#2563EB;">${c.atenciones.toLocaleString('es')}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#64748B;">Multi-punto:</span>
+            <strong style="color:#7C3AED;">${c.multiPunto.toLocaleString('es')}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:#64748B;">% red FEM:</span>
+            <strong style="color:#1A2B4B;">${c.pct}%</strong>
+          </div>
+        </div>
+      </div>`, { maxWidth: 240, closeButton: false });
+
+      const labelIcon = L.divIcon({
+        className: '',
+        html: `<div style="background:${color};color:#fff;font-size:9px;font-weight:800;
+          padding:2px 6px;border-radius:10px;white-space:nowrap;
+          box-shadow:0 1px 4px rgba(0,0,0,.3);margin-top:${radio+4}px;margin-left:-20px;">${c.label}</div>`,
+        iconSize: [0,0], iconAnchor: [0,0],
+      });
+
+      addLayer('fem_circle_' + i, circle);
+      addLayer('fem_label_'  + i, L.marker(coords, { icon: labelIcon, interactive: false }));
+    });
+
+    // ── 2. Rutas agregadas de fondo (sin filtro de ciudad) ──
+    if (!ciudadF) {
+      const RUTAS_AGRUP = [
+        { from:'CCS', to:'SCR', vol:320,  label:'Caracas → San Cristóbal' },
+        { from:'CCS', to:'MAR', vol:180,  label:'Caracas → Maracaibo' },
+        { from:'SCR', to:'CUC', vol:580,  label:'San Cristóbal → Cúcuta' },
+        { from:'MAR', to:'RIO', vol:140,  label:'Maracaibo → Riohacha' },
+        { from:'RIO', to:'BAR', vol:240,  label:'Riohacha → Barranquilla' },
+        { from:'BAR', to:'SMA', vol:180,  label:'Barranquilla → Santa Marta' },
+        { from:'SMA', to:'CTG', vol:200,  label:'Santa Marta → Cartagena' },
+        { from:'CUC', to:'BOG', vol:460,  label:'Cúcuta → Bogotá' },
+        { from:'CUC', to:'MED', vol:290,  label:'Cúcuta → Medellín' },
+        { from:'BOG', to:'MED', vol:180,  label:'Bogotá → Medellín' },
+        { from:'BOG', to:'CAL', vol:140,  label:'Bogotá → Cali' },
+        { from:'MED', to:'CTG', vol: 90,  label:'Medellín → Cartagena' },
+        { from:'MED', to:'CAL', vol:110,  label:'Medellín → Cali' },
+        { from:'CAL', to:'PTY', vol: 60,  label:'Cali → Ciudad de Panamá' },
+        { from:'CTG', to:'PTY', vol: 80,  label:'Cartagena → Ciudad de Panamá' },
+        { from:'PTY', to:'SJO', vol: 55,  label:'Panamá → San José' },
+        { from:'SJO', to:'GUA', vol: 42,  label:'San José → Guatemala' },
+        { from:'GUA', to:'CDM', vol: 38,  label:'Guatemala → Ciudad de México' },
+        { from:'CDM', to:'MIA', vol: 30,  label:'México → Miami' },
+        { from:'CDM', to:'HOU', vol: 28,  label:'México → Houston' },
+      ];
+      RUTAS_AGRUP.forEach((r, i) => {
+        const c1 = _MAP_COORDS[r.from], c2 = _MAP_COORDS[r.to];
+        if (!c1 || !c2) return;
+        const weight = Math.max(1.5, Math.min(1 + r.vol / 120, 6));
+        const line = L.polyline([c1, c2], {
+          color: '#2563EB', weight, opacity: 0.32, dashArray: '6 4',
+        });
+        line.bindTooltip(r.label + ' · ~' + r.vol + ' NNA', { sticky: true });
+        addLayer('ruta_agrup_' + i, line);
+      });
+    }
+
+    // Anillo de highlight para la ciudad filtrada
+    if (ciudadF) {
+      const coords = _MAP_COORDS[ciudadF];
+      if (coords) {
+        addLayer('city_ring', L.circleMarker(coords, {
+          radius: 38, fillColor: 'transparent', color: '#DC2626',
+          weight: 2.5, opacity: 0.65, fillOpacity: 0, dashArray: '5 4',
+        }));
+      }
+    }
+  }
+
+  // ── 3. Ruta individual de un NNA ──
+  if (nnaF) {
+    const m = migrantes.find(x => x.id === nnaF);
+    if (m) {
+      const pasos = m.ruta || [];
+      const puntos = pasos
+        .map(p => _MAP_COORDS[p.ciudadId] || _MAP_COORDS[p.paisId])
+        .filter(Boolean);
+
+      if (puntos.length >= 2) {
+        addLayer('nna_ruta', L.polyline(puntos, {
+          color: '#DC2626', weight: 4, opacity: 0.85, lineJoin: 'round',
+        }));
+        puntos.forEach((pt, idx) => {
+          const paso = pasos[idx];
+          const lugLabel = _MAP_LABELS[paso?.ciudadId] || _MAP_LABELS[paso?.paisId] || ('Punto ' + (idx+1));
+          const isFirst  = idx === 0;
+          const isLast   = idx === puntos.length - 1;
+          const color    = isFirst ? '#16A34A' : isLast ? '#DC2626' : '#F59E0B';
+          const dot = L.circleMarker(pt, {
+            radius: isFirst || isLast ? 10 : 7,
+            fillColor: color, color: '#fff', weight: 2, fillOpacity: 1,
+          });
+          dot.bindPopup(`<div style="font-family:Inter,sans-serif;">
+            <b style="color:#1A2B4B;">${isFirst ? '🟢 Origen' : isLast ? '🔴 Posición actual' : '🟡 Parada ' + idx}</b>
+            <p style="margin:4px 0 0;font-size:12px;color:#475569;">${lugLabel}</p>
+            ${paso?.fecha ? '<p style="margin:2px 0 0;font-size:11px;color:#94A3B8;">' + paso.fecha + '</p>' : ''}
+          </div>`, { closeButton: false });
+          addLayer('nna_punto_' + idx, dot);
+        });
+        try { map.fitBounds(window._mapaRutasLayers['nna_ruta'].getBounds().pad(0.3)); } catch(e){}
+      } else {
+        // NNA con un solo punto
+        const loc = _resolverCoordsLabel(m);
+        if (loc) {
+          const dot = L.circleMarker(loc.coords, {
+            radius: 12, fillColor: '#DC2626', color: '#fff', weight: 3, fillOpacity: 1,
+          });
+          dot.bindPopup(`<div style="font-family:Inter,sans-serif;">
+            <b style="color:#1A2B4B;">📍 ${loc.label}</b>
+            <p style="font-size:12px;color:#475569;margin:4px 0 0;">Un solo punto de atención registrado</p>
+          </div>`, { closeButton: false });
+          addLayer('nna_punto_unico', dot);
+          map.setView(loc.coords, 7);
+        }
+      }
+    }
+  }
+
+  // ── 4. Modo "solo puntos actuales" ──
+  if (modo === 'puntos') {
+    const COLORES_EST = { en_transito:'#F59E0B', atendido:'#3B82F6', derivado:'#8B5CF6', ubicado:'#10B981' };
+    const lista = ciudadF
+      ? migrantes.filter(m => m.ruta?.some(p => p.ciudadId === ciudadF) || m.ciudadActualId === ciudadF)
+      : migrantes;
+    const grupos = {};
+    lista.forEach(m => {
+      const loc = _resolverCoordsLabel(m);
+      if (!loc) return;
+      if (!grupos[loc.label]) grupos[loc.label] = { coords: loc.coords, label: loc.label, items: [] };
+      grupos[loc.label].items.push(m);
+    });
+    Object.values(grupos).forEach((g, i) => {
+      const est   = g.items[0]?.estado || 'en_transito';
+      const color = COLORES_EST[est] || '#6B7280';
+      const sz    = Math.max(20, Math.min(16 + Math.round(Math.sqrt(g.items.length) * 4), 50));
+      const icon  = L.divIcon({
+        className: '',
+        html: `<div style="background:${color};color:#fff;border-radius:50%;
+          width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;
+          font-size:${Math.round(sz*0.37)}px;font-weight:800;
+          border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);">
+          ${g.items.length > 999 ? (g.items.length/1000).toFixed(1)+'k' : g.items.length}
+        </div>`,
+        iconSize: [sz, sz], iconAnchor: [sz/2, sz/2],
+      });
+      const marker = L.marker(g.coords, { icon });
+      marker.bindPopup(`<div style="font-family:Inter,sans-serif;">
+        <b style="color:#1A2B4B;">📍 ${g.label}</b>
+        <p style="font-size:12px;color:#475569;margin:4px 0 0;">${g.items.length} NNA en este punto</p>
+      </div>`, { closeButton: false });
+      addLayer('punto_' + i, marker);
+    });
+  }
+
+  // ── 5. Badge de conteo ──
+  const badge = document.getElementById('ruta-conteo-badge');
+  if (badge) {
+    if (nnaF) {
+      const m = migrantes.find(x => x.id === nnaF);
+      if (m) {
+        const pasos = (m.ruta || []).length;
+        badge.innerHTML = `Mostrando ruta de <strong style="color:#DC2626;">${m.nombres} ${m.apellidos}</strong> · ${pasos || 1} punto${pasos !== 1 ? 's' : ''} de atención registrado${pasos !== 1 ? 's' : ''}`;
+      }
+    } else if (ciudadF) {
+      const c = ciudadesData.find(x => x.ciudadId === ciudadF);
+      if (c) badge.innerHTML = `Ciudad seleccionada: <strong style="color:#1A2B4B;">${c.label}</strong> · <strong>${c.nnaUnicos.toLocaleString('es')}</strong> NNA únicos · <strong>${c.atenciones.toLocaleString('es')}</strong> atenciones`;
+    } else {
+      const total = ciudadesData.reduce((s, c) => s + c.nnaUnicos, 0) || 4862;
+      badge.innerHTML = `Red completa FEM · <strong style="color:#1A2B4B;">${total.toLocaleString('es')}</strong> NNA únicos en <strong>${ciudadesData.length || 8}</strong> ciudades`;
+    }
+  }
+}
+
+function limpiarFiltrosRutas() {
+  ['ruta-filtro-nna', 'ruta-filtro-ciudad'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const modo = document.getElementById('ruta-modo');
+  if (modo) modo.value = 'rutas';
+  renderRutasMapa();
+  showToast('Filtros del mapa limpiados', 'info');
 }
 
 // ─── VISTA: SEGURIDAD ────────────────────────────────────────────

@@ -83,6 +83,7 @@ function fromDB_org(row) {
     recomendaciones:  row.recomendaciones_count || 0,
     activa:           row.activa !== false,
     descripcion:      row.descripcion || '',
+    esFEM:            row.es_fem || false,
   };
 }
 
@@ -280,14 +281,24 @@ async function loadDashboardStats() {
       //  siguen viniendo de mockData.js ya que no hay columnas para calcularlas)
       AppState.mockStats = {
         ...AppState.mockStats,          // preserva historico, rangoEdad, nexos, etc.
-        totalRegistros:     data.totalRegistros,
-        ninos:              data.ninos,
-        ninas:              data.ninas,
-        familias:           data.familias,
-        datosPendientes:    data.datosPendientes,
-        nnaMultiplesPuntos: data.nnaMultiplesPuntos,
-        nnaUnicoPunto:      data.nnaUnicoPunto,
-        pctMultiplesPuntos: data.pctMultiplesPuntos,
+        totalRegistros:      data.totalRegistros,
+        ninos:               data.ninos,
+        ninas:               data.ninas,
+        familias:            data.familias,
+        datosPendientes:     data.datosPendientes,
+        nnaMultiplesPuntos:  data.nnaMultiplesPuntos,
+        nnaUnicoPunto:       data.nnaUnicoPunto,
+        pctMultiplesPuntos:  data.pctMultiplesPuntos,
+        // Nuevos campos de trazabilidad y FEM
+        ...(data.atencionesCumuladas != null && { atencionesCumuladas: data.atencionesCumuladas }),
+        ...(data.femPct             != null && {
+          femVsOtras: {
+            fem:        data.femPct,
+            otras:      100 - data.femPct,
+            femTotal:   data.femTotal   || AppState.mockStats.femVsOtras?.femTotal,
+            otrasTotal: data.otrasTotal || AppState.mockStats.femVsOtras?.otrasTotal,
+          }
+        }),
       };
       console.log('[SB] KPIs en vivo desde RPC. Total registros:', data.totalRegistros);
     }
@@ -295,6 +306,39 @@ async function loadDashboardStats() {
   } catch (err) {
     console.warn('[SB] No se pudo ejecutar RPC compute_dashboard_stats, usando datos locales:', err.message);
     // Silently fallback — AppState.mockStats ya tiene los datos de mockData.js
+    return false;
+  }
+}
+
+// ─── CARGA DE ESTADÍSTICAS POR CIUDAD FEM ─────────────────────
+
+async function loadCiudadStats() {
+  try {
+    const { data, error } = await supabaseClient.rpc('get_ciudad_stats_fem');
+    if (error) throw error;
+
+    // La RPC devuelve un array JSON de objetos ciudad
+    const rows = Array.isArray(data) ? data : (data ? [data] : []);
+
+    if (rows.length > 0) {
+      // Normalizar claves snake_case → camelCase si vienen de PostgreSQL
+      AppState.mockStats.distribucionCiudadesFEM = rows.map(r => ({
+        ciudadId:  r.ciudad_id   || r.ciudadId,
+        label:     r.label,
+        paisId:    r.pais_id     || r.paisId,
+        paisLabel: r.pais_label  || r.paisLabel,
+        pct:       r.pct,
+        nnaUnicos: r.nna_unicos  || r.nnaUnicos,
+        atenciones:r.atenciones,
+        multiPunto:r.multi_punto || r.multiPunto,
+      }));
+      console.log('[SB] Ciudad stats FEM cargadas:', AppState.mockStats.distribucionCiudadesFEM.length, 'ciudades');
+    } else {
+      console.log('[SB] Sin ciudad stats en DB, usando datos mock');
+    }
+    return true;
+  } catch (err) {
+    console.warn('[SB] No se pudo ejecutar RPC get_ciudad_stats_fem, usando datos locales:', err.message);
     return false;
   }
 }
@@ -376,11 +420,12 @@ async function loadAllData() {
       AppState.organizaciones = (data || []).map(fromDB_org);
     })();
 
-    // Cargar dashboard stats y perfiles en paralelo con catálogos
-    const statsPromise  = loadDashboardStats();
+    // Cargar dashboard stats, ciudad stats y perfiles en paralelo con catálogos
+    const statsPromise   = loadDashboardStats();
+    const ciudadPromise  = loadCiudadStats();
     const profilePromise = loadProfiles();
 
-    await Promise.all([...catalogPromises, orgPromise, statsPromise, profilePromise]);
+    await Promise.all([...catalogPromises, orgPromise, statsPromise, ciudadPromise, profilePromise]);
 
     // Cargar migrantes reales (no bloquea si falla)
     await loadMigrantes();

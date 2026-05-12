@@ -398,15 +398,107 @@ const ORGANIZACIONES = [
   },
   {
     id: 'ORG11',
-    nombre: 'Fundación Mendoza',
+    nombre: 'Fundación Mendoza — Caracas',
     paisId: 'VE', ciudadId: 'CCS',
     tipo: 'Fundación privada',
     contacto: 'Antonio Fonseca',
     email: 'afonseca@fundacionmendoza.org',
     telefono: '+58 212 9901200',
     servicios: ['TS01','TS02','TS03','TS05','TS07'],
-    totalAtendidos: 445, activa: true, recomendaciones: 52,
-    descripcion: 'Fundación de alcance regional con programas de atención integral, documentación y reinserción socioeconómica.'
+    totalAtendidos: 875, activa: true, recomendaciones: 98,
+    esFEM: true,
+    descripcion: 'Sede principal de la Fundación Mendoza en Venezuela. Atención integral, documentación y derivación hacia Colombia.'
+  },
+  {
+    id: 'ORG12',
+    nombre: 'Fundación Mendoza — Cúcuta',
+    paisId: 'CO', ciudadId: 'CUC',
+    tipo: 'Fundación privada',
+    contacto: 'Carmen Villalba',
+    email: 'cucuta@fundacionmendoza.org',
+    telefono: '+57 7 5714400',
+    servicios: ['TS01','TS02','TS03','TS04','TS05','TS07'],
+    totalAtendidos: 972, activa: true, recomendaciones: 118,
+    esFEM: true,
+    descripcion: 'Nodo fronterizo más importante de la red FEM. Primer punto de atención tras el cruce Colombia–Venezuela. Atención 24h.'
+  },
+  {
+    id: 'ORG13',
+    nombre: 'Fundación Mendoza — Bogotá',
+    paisId: 'CO', ciudadId: 'BOG',
+    tipo: 'Fundación privada',
+    contacto: 'Lucía Morales',
+    email: 'bogota@fundacionmendoza.org',
+    telefono: '+57 1 7115500',
+    servicios: ['TS01','TS02','TS03','TS04','TS05','TS07','TS08'],
+    totalAtendidos: 681, activa: true, recomendaciones: 82,
+    esFEM: true,
+    descripcion: 'Centro de referencia y relocalización de la red FEM en Colombia. Atención integral y reinserción laboral.'
+  },
+  {
+    id: 'ORG14',
+    nombre: 'Fundación Mendoza — Medellín',
+    paisId: 'CO', ciudadId: 'MED',
+    tipo: 'Fundación privada',
+    contacto: 'Jorge Ríos',
+    email: 'medellin@fundacionmendoza.org',
+    telefono: '+57 4 4443300',
+    servicios: ['TS01','TS02','TS03','TS05','TS07'],
+    totalAtendidos: 535, activa: true, recomendaciones: 64,
+    esFEM: true,
+    descripcion: 'Punto de acogida en Medellín. Enfocado en familias y menores no acompañados en tránsito.'
+  },
+  {
+    id: 'ORG15',
+    nombre: 'Fundación Mendoza — Cali',
+    paisId: 'CO', ciudadId: 'CAL',
+    tipo: 'Fundación privada',
+    contacto: 'Adriana Zapata',
+    email: 'cali@fundacionmendoza.org',
+    telefono: '+57 2 6618800',
+    servicios: ['TS01','TS02','TS03','TS04','TS05'],
+    totalAtendidos: 486, activa: true, recomendaciones: 57,
+    esFEM: true,
+    descripcion: 'Centro de atención en Cali para NNA y familias en tránsito hacia el Pacífico y Panamá.'
+  },
+  {
+    id: 'ORG16',
+    nombre: 'Fundación Mendoza — Barranquilla',
+    paisId: 'CO', ciudadId: 'BAR',
+    tipo: 'Fundación privada',
+    contacto: 'Samuel Meza',
+    email: 'barranquilla@fundacionmendoza.org',
+    telefono: '+57 5 3852200',
+    servicios: ['TS01','TS02','TS03','TS05','TS07'],
+    totalAtendidos: 486, activa: true, recomendaciones: 57,
+    esFEM: true,
+    descripcion: 'Punto de atención en el Caribe colombiano. Atiende NNA que transitan por la costa norte.'
+  },
+  {
+    id: 'ORG17',
+    nombre: 'Fundación Mendoza — Cartagena',
+    paisId: 'CO', ciudadId: 'CTG',
+    tipo: 'Fundación privada',
+    contacto: 'Paola Herrera',
+    email: 'cartagena@fundacionmendoza.org',
+    telefono: '+57 5 6603300',
+    servicios: ['TS01','TS02','TS03','TS04','TS05'],
+    totalAtendidos: 438, activa: true, recomendaciones: 52,
+    esFEM: true,
+    descripcion: 'Centro de acogida en Cartagena. Coordinación con embarcaciones del corredor Caribe y derivación hacia Panamá.'
+  },
+  {
+    id: 'ORG18',
+    nombre: 'Fundación Mendoza — Santa Marta',
+    paisId: 'CO', ciudadId: 'SMA',
+    tipo: 'Fundación privada',
+    contacto: 'Diana Orozco',
+    email: 'santamarta@fundacionmendoza.org',
+    telefono: '+57 5 4311100',
+    servicios: ['TS01','TS02','TS03','TS05'],
+    totalAtendidos: 389, activa: true, recomendaciones: 44,
+    esFEM: true,
+    descripcion: 'Punto de atención en Santa Marta. Coordina con la red de albergues del corredor Caribe colombiano.'
   },
 ];
 
@@ -1075,6 +1167,30 @@ const MOCK_STATS = {
   nnaMultiplesPuntos: 2917, // 60% — acompañados en trayectoria
   nnaUnicoPunto:      1945, // 40% — atendidos en un solo punto
   pctMultiplesPuntos: 60,
+
+  // Atenciones acumuladas (NNA únicos × promedio de puntos visitados)
+  // 1.945 × 1 + 2.917 × 2 = 7.779
+  atencionesCumuladas: 7779,
+
+  // Distribución por ciudad — Red territorial FEM
+  distribucionCiudadesFEM: [
+    { ciudadId:'CUC', label:'Cúcuta',       paisId:'CO', paisLabel:'Colombia',  pct:20, nnaUnicos: 972, atenciones:1556, multiPunto:583 },
+    { ciudadId:'CCS', label:'Caracas',      paisId:'VE', paisLabel:'Venezuela', pct:18, nnaUnicos: 875, atenciones:1400, multiPunto:525 },
+    { ciudadId:'BOG', label:'Bogotá',       paisId:'CO', paisLabel:'Colombia',  pct:14, nnaUnicos: 681, atenciones:1089, multiPunto:408 },
+    { ciudadId:'MED', label:'Medellín',     paisId:'CO', paisLabel:'Colombia',  pct:11, nnaUnicos: 535, atenciones: 856, multiPunto:321 },
+    { ciudadId:'CAL', label:'Cali',         paisId:'CO', paisLabel:'Colombia',  pct:10, nnaUnicos: 486, atenciones: 778, multiPunto:292 },
+    { ciudadId:'BAR', label:'Barranquilla', paisId:'CO', paisLabel:'Colombia',  pct:10, nnaUnicos: 486, atenciones: 778, multiPunto:292 },
+    { ciudadId:'CTG', label:'Cartagena',    paisId:'CO', paisLabel:'Colombia',  pct: 9, nnaUnicos: 438, atenciones: 700, multiPunto:263 },
+    { ciudadId:'SMA', label:'Santa Marta',  paisId:'CO', paisLabel:'Colombia',  pct: 8, nnaUnicos: 389, atenciones: 622, multiPunto:233 },
+  ],
+
+  // Distribución institucional — FEM vs otras organizaciones de la red
+  femVsOtras: {
+    fem:       85,   // % casos atendidos por FEM
+    otras:     15,   // % casos atendidos por otras orgs aliadas
+    femTotal:  4132, // NNA atendidos por FEM (85% de 4.862)
+    otrasTotal: 730, // NNA atendidos por otras orgs (15% de 4.862)
+  },
 
   historico: [
     { mes: '2025-05', label: 'May 25', total: 4362 },
