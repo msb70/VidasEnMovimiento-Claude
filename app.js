@@ -710,31 +710,39 @@ function viewDashboard(container) {
         ${siNoCard('Sistema Escolar',ms.sistEscolarSI,100-ms.sistEscolarSI)}
       </div>
 
-      <!-- GRILLA 2 COL: País destino / residencia + plataformas / ONGs -->
+      <!-- GRILLA 2 COL: NNA por país / Atenciones por país + plataformas / ONGs FEM -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="card">
-          <div class="card-header"><div class="card-title">País Destino</div></div>
-          ${ms.paisDestino.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1F5F9;">
-            <span style="font-size:13px;">${p.bandera} ${p.label}</span>
+          <div class="card-header"><div class="card-title">🌎 NNA Únicos por País (Red FEM)</div></div>
+          ${ms.paisDestino.map(p=>`<div style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+              <span style="font-size:13px;font-weight:600;">${p.bandera} ${p.label}</span>
+              <span style="font-size:13px;font-weight:800;color:#1A2B4B;">${(p.nna||0).toLocaleString('es')} NNA</span>
+            </div>
             <div style="display:flex;align-items:center;gap:8px;">
-              <div style="background:#F1F5F9;border-radius:20px;height:6px;width:72px;overflow:hidden;">
+              <div style="background:#F1F5F9;border-radius:20px;height:7px;flex:1;overflow:hidden;">
                 <div style="background:#2563EB;height:100%;width:${p.pct}%;border-radius:20px;"></div>
               </div>
-              <span style="font-size:12px;font-weight:700;color:#1A2B4B;min-width:30px;text-align:right;">${p.pct}%</span>
+              <span style="font-size:11px;font-weight:700;color:#2563EB;min-width:32px;text-align:right;">${p.pct}%</span>
             </div>
           </div>`).join('')}
+          <div style="padding:8px 0;font-size:11px;color:#64748B;text-align:right;">Total: 4.862 NNA únicos</div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="card-title">País Residencia Actual</div></div>
-          ${ms.paisResidencia.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1F5F9;">
-            <span style="font-size:13px;">${p.bandera} ${p.label}</span>
+          <div class="card-header"><div class="card-title">📋 Atenciones Acumuladas por País</div></div>
+          ${ms.paisResidencia.map(p=>`<div style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+              <span style="font-size:13px;font-weight:600;">${p.bandera} ${p.label}</span>
+              <span style="font-size:13px;font-weight:800;color:#7C3AED;">${(p.atenciones||0).toLocaleString('es')} atenc.</span>
+            </div>
             <div style="display:flex;align-items:center;gap:8px;">
-              <div style="background:#F1F5F9;border-radius:20px;height:6px;width:72px;overflow:hidden;">
+              <div style="background:#F1F5F9;border-radius:20px;height:7px;flex:1;overflow:hidden;">
                 <div style="background:#8B5CF6;height:100%;width:${p.pct}%;border-radius:20px;"></div>
               </div>
-              <span style="font-size:12px;font-weight:700;color:#1A2B4B;min-width:30px;text-align:right;">${p.pct}%</span>
+              <span style="font-size:11px;font-weight:700;color:#7C3AED;min-width:32px;text-align:right;">${p.pct}%</span>
             </div>
           </div>`).join('')}
+          <div style="padding:8px 0;font-size:11px;color:#64748B;text-align:right;">Total: 7.779 atenciones acumuladas</div>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Plataformas Digitales</div></div>
@@ -742,16 +750,16 @@ function viewDashboard(container) {
         </div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title">ONGs — Recomendaciones</div>
+            <div class="card-title">Oficinas FEM — Recomendaciones</div>
             <button class="btn btn-secondary btn-sm" onclick="navigate('/datos/organizaciones')">Ver todas →</button>
           </div>
-          ${AppState.organizaciones.sort((a,b)=>b.recomendaciones-a.recomendaciones).slice(0,5).map((o,i)=>{
+          ${AppState.organizaciones.filter(o=>o.esFEM && (o.paisId==='VE'||o.paisId==='CO')).sort((a,b)=>b.recomendaciones-a.recomendaciones).slice(0,5).map((o,i)=>{
             const p=Helpers.paisById(o.paisId);
             return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F1F5F9;">
               <div style="width:20px;height:20px;background:#EFF6FF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#2563EB;flex-shrink:0;">${i+1}</div>
               <div style="flex:1;min-width:0;">
                 <div style="font-size:12px;font-weight:600;color:#1A2B4B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.nombre}</div>
-                <div style="font-size:11px;color:#94A3B8;">${p?.bandera||''} ${p?.label||''}</div>
+                <div style="font-size:11px;color:#94A3B8;">${p?.bandera||''} ${p?.label||''} · FEM</div>
               </div>
               <div style="text-align:right;flex-shrink:0;">
                 <div style="font-size:13px;font-weight:700;color:#F59E0B;">★ ${o.recomendaciones}</div>
