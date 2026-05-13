@@ -845,14 +845,34 @@ function actualizarDashboard() {
     'CO': { nna: 3987, atenciones: 6379 },
     'VE': { nna:  875, atenciones: 1400 },
   };
+  // Stats exactas por ciudad (fuente: Supabase dashboard_stats)
+  const CIUDAD_STATS = {
+    'CUC': { nna:  972, atenciones: 1556, pct: 20 },
+    'CCS': { nna:  875, atenciones: 1400, pct: 18 },
+    'BOG': { nna:  681, atenciones: 1089, pct: 14 },
+    'MED': { nna:  535, atenciones:  856, pct: 11 },
+    'CAL': { nna:  486, atenciones:  778, pct: 10 },
+    'BAR': { nna:  486, atenciones:  778, pct: 10 },
+    'CTG': { nna:  438, atenciones:  700, pct:  9 },
+    'SMA': { nna:  389, atenciones:  622, pct:  8 },
+  };
 
   let t, ni, na, fa, pe, mult, unico;
   const pctT = ms.pctMultiplesPuntos; // 60% fijo
 
-  if (paisId && PAIS_STATS[paisId]) {
-    // Usar stats exactas para CO y VE
-    const cs   = PAIS_STATS[paisId];
-    const prop = cs.nna / (ms.nnaTotal || 4862);
+  if (ciudadId && CIUDAD_STATS[ciudadId]) {
+    // Prioridad 1: stats exactas por ciudad
+    const cs = CIUDAD_STATS[ciudadId];
+    t    = cs.nna;
+    ni   = Math.round(t * (ms.ninos  / ms.totalRegistros));
+    na   = Math.round(t * (ms.ninas  / ms.totalRegistros));
+    fa   = Math.round(t * (ms.familias / ms.totalRegistros));
+    pe   = Math.round(t * (ms.datosPendientes / ms.totalRegistros));
+    mult = Math.round(t * pctT / 100);
+    unico = t - mult;
+  } else if (paisId && PAIS_STATS[paisId]) {
+    // Prioridad 2: stats exactas por país
+    const cs = PAIS_STATS[paisId];
     t    = cs.nna;
     ni   = Math.round(t * (ms.ninos  / ms.totalRegistros));
     na   = Math.round(t * (ms.ninas  / ms.totalRegistros));
@@ -861,12 +881,11 @@ function actualizarDashboard() {
     mult = Math.round(t * pctT / 100);
     unico = t - mult;
   } else {
-    // Sin filtro de país: ratio por ciudad/org sobre mockStats global
+    // Sin filtro geográfico: ratio por org sobre mockStats global
     const base = getVisibleMigrantes();
     let filtrados = base;
-    if (ciudadId) filtrados = filtrados.filter(m => m.ciudadActualId === ciudadId);
-    if (orgId)    filtrados = filtrados.filter(m => m.orgActualId    === orgId);
-    const isFiltered = !!(ciudadId || orgId);
+    if (orgId) filtrados = filtrados.filter(m => m.orgActualId === orgId);
+    const isFiltered = !!orgId;
     const ratio     = base.length > 0 ? filtrados.length / base.length : 1;
     const baseRatio = AppState.migrantes.length > 0 ? base.length / AppState.migrantes.length : 1;
     const effectiveRatio = isFiltered ? ratio * baseRatio : baseRatio;
@@ -4100,7 +4119,7 @@ async function callInviteEdgeFn(payload) {
   // window.location.origin es "null" para file:// → usar fallback de Supabase
   const origin = (window.location.origin && window.location.origin !== 'null')
     ? window.location.origin
-    : 'https://izcqcnunryhntojhxywu.supabase.co';
+    : 'https://vidasenmovimiento.com';
 
   const res = await fetch(EDGE_FN_INVITE, {
     method: 'POST',
