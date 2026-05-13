@@ -494,11 +494,11 @@ function viewDashboard(container) {
           <span style="font-size:13px;font-weight:600;color:#475569;">Filtros:</span>
           <select id="db-f-pais" class="form-control" style="width:auto;min-width:150px;" onchange="const sc=document.getElementById('db-f-ciudad');if(sc)sc.value='';actualizarDashboard()">
             <option value="">Todos los países</option>
-            ${AppState.catalogos.paises.map(p=>`<option value="${p.id}">${p.bandera} ${p.label}</option>`).join('')}
+            ${AppState.catalogos.paises.filter(p=>p.id==='CO'||p.id==='VE').map(p=>`<option value="${p.id}">${p.bandera} ${p.label}</option>`).join('')}
           </select>
           <select id="db-f-ciudad" class="form-control" style="width:auto;min-width:160px;" onchange="actualizarDashboard()">
             <option value="">Todas las ciudades</option>
-            ${AppState.catalogos.ciudades.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}
+            ${AppState.catalogos.ciudades.filter(c=>c.paisId==='CO'||c.paisId==='VE').map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}
           </select>
           <select id="db-f-ong" class="form-control" style="width:auto;min-width:210px;" onchange="actualizarDashboard()">
             <option value="">Todas las ONGs</option>
@@ -840,30 +840,45 @@ function actualizarDashboard() {
   const orgId    = document.getElementById('db-f-ong')?.value    || '';
   const ms = AppState.mockStats;
 
-  // Base según permisos del usuario — respeta org-scoping
-  const base = getVisibleMigrantes();
+  // Stats exactas por país (fuente: Supabase dashboard_stats)
+  const PAIS_STATS = {
+    'CO': { nna: 3987, atenciones: 6379 },
+    'VE': { nna:  875, atenciones: 1400 },
+  };
 
-  // Filtrar migrantes reales
-  let filtrados = base;
-  if (paisId)   filtrados = filtrados.filter(m => m.paisActualId   === paisId);
-  if (ciudadId) filtrados = filtrados.filter(m => m.ciudadActualId === ciudadId);
-  if (orgId)    filtrados = filtrados.filter(m => m.orgActualId    === orgId);
+  let t, ni, na, fa, pe, mult, unico;
+  const pctT = ms.pctMultiplesPuntos; // 60% fijo
 
+  if (paisId && PAIS_STATS[paisId]) {
+    // Usar stats exactas para CO y VE
+    const cs   = PAIS_STATS[paisId];
+    const prop = cs.nna / (ms.nnaTotal || 4862);
+    t    = cs.nna;
+    ni   = Math.round(t * (ms.ninos  / ms.totalRegistros));
+    na   = Math.round(t * (ms.ninas  / ms.totalRegistros));
+    fa   = Math.round(t * (ms.familias / ms.totalRegistros));
+    pe   = Math.round(t * (ms.datosPendientes / ms.totalRegistros));
+    mult = Math.round(t * pctT / 100);
+    unico = t - mult;
+  } else {
+    // Sin filtro de país: ratio por ciudad/org sobre mockStats global
+    const base = getVisibleMigrantes();
+    let filtrados = base;
+    if (ciudadId) filtrados = filtrados.filter(m => m.ciudadActualId === ciudadId);
+    if (orgId)    filtrados = filtrados.filter(m => m.orgActualId    === orgId);
+    const isFiltered = !!(ciudadId || orgId);
+    const ratio     = base.length > 0 ? filtrados.length / base.length : 1;
+    const baseRatio = AppState.migrantes.length > 0 ? base.length / AppState.migrantes.length : 1;
+    const effectiveRatio = isFiltered ? ratio * baseRatio : baseRatio;
+    t    = Math.round(ms.totalRegistros     * effectiveRatio);
+    ni   = Math.round(ms.ninos              * effectiveRatio);
+    na   = Math.round(ms.ninas              * effectiveRatio);
+    fa   = Math.round(ms.familias           * effectiveRatio);
+    pe   = Math.round(ms.datosPendientes    * effectiveRatio);
+    mult = Math.round(ms.nnaMultiplesPuntos * effectiveRatio);
+    unico= Math.round(ms.nnaUnicoPunto      * effectiveRatio);
+  }
   const isFiltered = !!(paisId || ciudadId || orgId);
-  const ratio = base.length > 0 ? filtrados.length / base.length : 1;
-  // Ratio global para escalar mockStats desde el total visible
-  const baseRatio = AppState.migrantes.length > 0 ? base.length / AppState.migrantes.length : 1;
-
-  // Escalar MOCK_STATS según ratio (siempre escala desde base visible)
-  const effectiveRatio = isFiltered ? ratio * baseRatio : baseRatio;
-  const t    = Math.round(ms.totalRegistros     * effectiveRatio);
-  const ni   = Math.round(ms.ninos              * effectiveRatio);
-  const na   = Math.round(ms.ninas              * effectiveRatio);
-  const fa   = Math.round(ms.familias           * effectiveRatio);
-  const pe   = Math.round(ms.datosPendientes    * effectiveRatio);
-  const mult = Math.round(ms.nnaMultiplesPuntos * effectiveRatio);
-  const unico= Math.round(ms.nnaUnicoPunto      * effectiveRatio);
-  const pctT = ms.pctMultiplesPuntos; // porcentaje fijo 60%
 
   const pctNi = t > 0 ? ((ni / t) * 100).toFixed(1) : '0.0';
   const pctNa = t > 0 ? ((na / t) * 100).toFixed(1) : '0.0';
@@ -906,12 +921,12 @@ function actualizarDashboard() {
     }
   }
 
-  // Al cambiar país, filtrar ciudades del selector
+  // Al cambiar país, filtrar ciudades del selector (solo CO/VE)
   const selCiudad = document.getElementById('db-f-ciudad');
   if (selCiudad) {
     const ciudadesSource = paisId
       ? AppState.catalogos.ciudades.filter(c => c.paisId === paisId)
-      : AppState.catalogos.ciudades;
+      : AppState.catalogos.ciudades.filter(c => c.paisId === 'CO' || c.paisId === 'VE');
     const currentCity = selCiudad.value;
     selCiudad.innerHTML = `<option value="">Todas las ciudades</option>` +
       ciudadesSource.map(c => `<option value="${c.id}"${c.id === currentCity ? ' selected' : ''}>${c.label}</option>`).join('');
@@ -923,11 +938,11 @@ function limpiarFiltrosDashboard() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  // Restaurar selector de ciudades completo
+  // Restaurar selector de ciudades (solo CO/VE)
   const selCiudad = document.getElementById('db-f-ciudad');
   if (selCiudad) {
     selCiudad.innerHTML = `<option value="">Todas las ciudades</option>` +
-      AppState.catalogos.ciudades.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+      AppState.catalogos.ciudades.filter(c=>c.paisId==='CO'||c.paisId==='VE').map(c => `<option value="${c.id}">${c.label}</option>`).join('');
   }
   actualizarDashboard();
 }
