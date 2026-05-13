@@ -1197,12 +1197,12 @@ const MOCK_STATS = {
     { ciudadId:'SMA', label:'Santa Marta',  paisId:'CO', paisLabel:'Colombia',  pct: 8, nnaUnicos: 389, atenciones: 622, multiPunto:233 },
   ],
 
-  // Distribución institucional — FEM vs otras organizaciones de la red
+  // Distribución institucional — Fundación Mendoza (FEM)
   femVsOtras: {
-    fem:       85,   // % casos atendidos por FEM
-    otras:     15,   // % casos atendidos por otras orgs aliadas
-    femTotal:  4132, // NNA atendidos por FEM (85% de 4.862)
-    otrasTotal: 730, // NNA atendidos por otras orgs (15% de 4.862)
+    fem:        100, // 100% de los NNA atendidos por FEM (Fundación Mendoza)
+    otras:        0,
+    femTotal:  4862, // Total NNA atendidos por FEM
+    otrasTotal:   0,
   },
 
   historico: [

@@ -572,7 +572,7 @@ function viewDashboard(container) {
           <div style="font-size:12px;color:#94A3B8;margin-top:5px;">
             <span style="color:#C4B5FD;font-weight:700;">${(ms.atencionesCumuladas||7779).toLocaleString('es')} atenciones acumuladas</span>
             &nbsp;·&nbsp;
-            <span style="color:#A5F3FC;font-weight:700;">${ms.femVsOtras?.fem||85}% atendidos por FEM</span>
+            <span style="color:#A5F3FC;font-weight:700;">${ms.femVsOtras?.fem||100}% atendidos por FEM</span>
             &nbsp;·&nbsp;
             <span style="font-style:italic;">"Vidas en Movimiento acompaña trayectorias, no solo registra casos"</span>
           </div>
@@ -589,7 +589,7 @@ function viewDashboard(container) {
           </div>
           <div style="width:1px;background:rgba(255,255,255,.15);"></div>
           <div style="text-align:center;">
-            <div style="font-size:30px;font-weight:800;color:#A5F3FC;line-height:1;">${ms.femVsOtras?.fem||85}%</div>
+            <div style="font-size:30px;font-weight:800;color:#A5F3FC;line-height:1;">${ms.femVsOtras?.fem||100}%</div>
             <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Red<br>FEM</div>
           </div>
         </div>
@@ -3052,13 +3052,13 @@ function viewMapaMigrantes(container) {
     const kpiAtencion = ms.atencionesCumuladas || 7779;
     const kpiMulti    = ms.nnaMultiplesPuntos || 2917;
     const kpiUnico    = ms.nnaUnicoPunto || 1945;
-    const femPct      = ms.femVsOtras?.fem || 85;
+    const femPct      = ms.femVsOtras?.fem || 100;
 
     container.innerHTML = `
       <div class="page-header">
         <div>
           <h1 class="page-title">Mapa de Rutas Migratorias</h1>
-          <p class="page-subtitle">Red territorial FEM · Colombia y Venezuela · ${kpiTotal.toLocaleString('es')} NNA registrados</p>
+          <p class="page-subtitle">Red territorial Fundación Mendoza · Venezuela y Colombia · ${kpiTotal.toLocaleString('es')} NNA registrados · 100% atendidos por FEM</p>
         </div>
         <div class="page-actions">
           <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosRutas()">✕ Limpiar filtros</button>
@@ -3189,7 +3189,7 @@ function viewMapaMigrantes(container) {
           </table>
         </div>
         <div style="padding:12px 16px;background:#EFF6FF;border-top:1px solid #DBEAFE;display:flex;gap:24px;flex-wrap:wrap;">
-          <div style="font-size:12px;color:#1D4ED8;"><strong>85%</strong> de los NNA atendidos por oficinas FEM · <strong>15%</strong> por organizaciones aliadas de la red</div>
+          <div style="font-size:12px;color:#1D4ED8;"><strong>100%</strong> de los NNA registrados son atendidos por oficinas de la Fundación Mendoza (FEM)</div>
           <div style="font-size:12px;color:#64748B;">Supuesto conservador: 40% con 1 punto · 60% con 2 puntos de atención</div>
         </div>
       </div>
