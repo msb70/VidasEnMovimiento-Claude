@@ -1067,6 +1067,7 @@ function renderListado() {
         <td onclick="event.stopPropagation()">
           <div style="display:flex;gap:4px;justify-content:flex-end;">
             <button class="btn btn-sm btn-secondary" onclick="navigate('/migrante/detalle/${m.id}')">Ver</button>
+            <button class="btn btn-sm" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;" title="Ver ruta en el mapa" onclick="verRutaNNA('${m.id}')">🗺 Ruta</button>
             <button class="btn btn-sm" style="background:#EFF6FF;color:#2563EB;" onclick="navigate('/migrante/nuevo',{editId:'${m.id}'})">Editar</button>
           </div>
         </td>
@@ -1378,7 +1379,10 @@ function viewMigranteDetalle(container, params = {}) {
                 <div class="card-title">🗺 Ruta migratoria</div>
                 <div class="card-subtitle">${ruta.length} evento${ruta.length !== 1 ? 's' : ''} registrado${ruta.length !== 1 ? 's' : ''}</div>
               </div>
-              <button class="btn btn-secondary btn-sm" onclick="abrirNuevoEvento('${m.id}')">+ Agregar</button>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm" style="background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;" onclick="verRutaNNA('${m.id}')">🗺 Ver en mapa</button>
+                <button class="btn btn-secondary btn-sm" onclick="abrirNuevoEvento('${m.id}')">+ Agregar</button>
+              </div>
             </div>
             <div class="timeline">
               ${ruta.length === 0
@@ -3085,22 +3089,34 @@ function viewMapaMigrantes(container) {
         </div>
       </div>
 
-      <!-- Filtros -->
-      <div class="card" style="padding:14px 18px;margin-bottom:12px;">
-        <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Filtros del mapa</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-          <div style="flex:2;min-width:240px;">
-            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">🧒 Filtrar por NNA — ver ruta individual</div>
-            <select class="form-control" id="ruta-filtro-nna" onchange="renderRutasMapa()" style="font-size:13px;">
-              <option value="">— Todos los NNA —</option>
-              ${migrantes.map(m=>`<option value="${m.id}">${m.nombres} ${m.apellidos}</option>`).join('')}
-            </select>
+      <!-- Filtro NNA destacado -->
+      <div style="background:linear-gradient(135deg,#FEF3C7 0%,#FFFBEB 100%);border:2px solid #FCD34D;border-radius:12px;padding:14px 18px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:18px;">🧒</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#92400E;">Ver ruta individual de un NNA</div>
+            <div style="font-size:11px;color:#B45309;">Selecciona un niño/niña para visualizar su trayectoria completa en el mapa</div>
           </div>
+        </div>
+        <select class="form-control" id="ruta-filtro-nna" onchange="renderRutasMapa()" style="font-size:13px;border-color:#FCD34D;background:#fff;">
+          <option value="">— Seleccionar NNA —</option>
+          ${migrantes.map(m => {
+            const pasos = (m.ruta || []).length;
+            const rutaLabel = pasos > 1 ? ` · ${pasos} puntos de ruta` : ' · 1 punto';
+            return `<option value="${m.id}">${m.nombres} ${m.apellidos}${rutaLabel}</option>`;
+          }).join('')}
+        </select>
+      </div>
+
+      <!-- Filtros secundarios -->
+      <div class="card" style="padding:12px 18px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Filtros de red</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
           <div style="flex:2;min-width:200px;">
-            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">📍 Filtrar por ciudad</div>
+            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">📍 Filtrar por ciudad FEM</div>
             <select class="form-control" id="ruta-filtro-ciudad" onchange="renderRutasMapa()" style="font-size:13px;">
               <option value="">— Todas las ciudades —</option>
-              ${ciudadesData.map(c=>`<option value="${c.ciudadId}">${c.label} — ${c.nnaUnicos.toLocaleString('es')} NNA</option>`).join('')}
+              ${ciudadesData.map(c=>`<option value="${c.ciudadId}">${c.label} — ${(c.nnaUnicos||0).toLocaleString('es')} NNA</option>`).join('')}
             </select>
           </div>
           <div style="flex:1;min-width:160px;">
@@ -3144,26 +3160,31 @@ function viewMapaMigrantes(container) {
               ${ciudadesData.map(c=>`
                 <tr>
                   <td><strong>${c.label}</strong></td>
-                  <td><span class="badge badge-gray">${c.paisLabel}</span></td>
-                  <td style="text-align:right;font-weight:700;color:#1A2B4B;">${c.nnaUnicos.toLocaleString('es')}</td>
-                  <td style="text-align:right;color:#2563EB;font-weight:600;">${c.atenciones.toLocaleString('es')}</td>
-                  <td style="text-align:right;color:#7C3AED;">${c.multiPunto.toLocaleString('es')}</td>
-                  <td style="text-align:right;font-weight:700;">${c.pct}%</td>
+                  <td><span class="badge badge-gray">${c.paisLabel||''}</span></td>
+                  <td style="text-align:right;font-weight:700;color:#1A2B4B;">${(c.nnaUnicos||0).toLocaleString('es')}</td>
+                  <td style="text-align:right;color:#2563EB;font-weight:600;">${(c.atenciones||0).toLocaleString('es')}</td>
+                  <td style="text-align:right;color:#7C3AED;">${(c.multiPunto||0).toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:700;">${c.pct||0}%</td>
                   <td>
                     <div style="background:#F1F5F9;border-radius:20px;height:6px;overflow:hidden;">
-                      <div style="background:#2563EB;height:100%;width:${c.pct * 5}%;border-radius:20px;max-width:100%;"></div>
+                      <div style="background:#2563EB;height:100%;width:${(c.pct||0) * 5}%;border-radius:20px;max-width:100%;"></div>
                     </div>
                   </td>
                 </tr>
               `).join('')}
-              <tr style="background:#F8FAFC;">
-                <td colspan="2"><strong>TOTAL RED FEM</strong></td>
-                <td style="text-align:right;font-weight:800;color:#1A2B4B;">${(4862).toLocaleString('es')}</td>
-                <td style="text-align:right;font-weight:800;color:#2563EB;">${(7779).toLocaleString('es')}</td>
-                <td style="text-align:right;font-weight:800;color:#7C3AED;">${(2917).toLocaleString('es')}</td>
-                <td style="text-align:right;font-weight:800;">100%</td>
-                <td></td>
-              </tr>
+              ${(() => {
+                const totNNA  = ciudadesData.reduce((s,c) => s + (c.nnaUnicos||0), 0) || kpiTotal;
+                const totAt   = ciudadesData.reduce((s,c) => s + (c.atenciones||0), 0) || kpiAtencion;
+                const totMult = ciudadesData.reduce((s,c) => s + (c.multiPunto||0), 0) || kpiMulti;
+                return `<tr style="background:#F8FAFC;">
+                  <td colspan="2"><strong>TOTAL RED FEM</strong></td>
+                  <td style="text-align:right;font-weight:800;color:#1A2B4B;">${totNNA.toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:800;color:#2563EB;">${totAt.toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:800;color:#7C3AED;">${totMult.toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:800;">100%</td>
+                  <td></td>
+                </tr>`;
+              })()}
             </tbody>
           </table>
         </div>
@@ -3185,9 +3206,27 @@ function viewMapaMigrantes(container) {
         attribution: '© OpenStreetMap', maxZoom: 18
       }).addTo(map);
 
+      // Pre-seleccionar NNA si se llegó desde el listado con el botón "🗺 Ruta"
+      if (AppState.mapPreSelectNNA) {
+        const sel = document.getElementById('ruta-filtro-nna');
+        if (sel) sel.value = AppState.mapPreSelectNNA;
+        AppState.mapPreSelectNNA = null;
+      }
       renderRutasMapa();
     }, 100);
   });
+}
+
+// Navega al mapa de rutas con un NNA pre-seleccionado
+function verRutaNNA(id) {
+  AppState.mapPreSelectNNA = id;
+  // Intentar navegar al mapa de migrantes (módulo Migrante o Consulta)
+  const route = window.location.hash || '';
+  if (route.includes('/consulta/')) {
+    navigate('/consulta/mapa-migrantes');
+  } else {
+    navigate('/migrantes/mapa');
+  }
 }
 
 // Edad en años desde fecha ISO

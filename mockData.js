@@ -613,6 +613,8 @@ const MIGRANTES = [
     vulnerabilidad: 'alta',
     notas: 'Menor de edad, viaja con madre (M001). Programa educativo activo.',
     ruta: [
+      { fecha:'2025-08-10', paisId:'VE', ciudadId:'CCS', orgId:'ORG01', servicios:['TS01'], obs:'Orientación previa a la salida. Viaja con madre (M001).' },
+      { fecha:'2025-09-05', paisId:'CO', ciudadId:'CUC', orgId:'ORG03', servicios:['TS01','TS02'], obs:'Cruce fronterizo. Atención humanitaria junto a su madre.' },
       { fecha:'2025-10-22', paisId:'PA', ciudadId:'PTY', orgId:'ORG05', servicios:['TS01','TS02','TS03','TS07'], obs:'Atención integral. Ingresada a programa educativo temporal.' },
     ]
   },
@@ -657,6 +659,8 @@ const MIGRANTES = [
     vulnerabilidad: 'baja',
     notas: 'Profesional de enfermería. Interesada en validación de títulos.',
     ruta: [
+      { fecha:'2025-06-20', paisId:'VE', ciudadId:'MAR', orgId:'ORG02', servicios:['TS01'], obs:'Registro previo. Planificación de ruta migratoria.' },
+      { fecha:'2025-07-15', paisId:'CO', ciudadId:'CUC', orgId:'ORG03', servicios:['TS01'], obs:'Cruce por Cúcuta. Tránsito rápido hacia Bogotá.' },
       { fecha:'2025-08-11', paisId:'CO', ciudadId:'BOG', orgId:'ORG04', servicios:['TS05','TS08'], obs:'Orientación laboral y validación de títulos.' },
     ]
   },
@@ -721,6 +725,8 @@ const MIGRANTES = [
     vulnerabilidad: 'media',
     notas: 'Hija de Yolanda Figueroa (M009). Programa escolar activo.',
     ruta: [
+      { fecha:'2025-07-14', paisId:'CO', ciudadId:'CUC', orgId:'ORG03', servicios:['TS01','TS02'], obs:'Tránsito con madre (M009). Atención básica familiar.' },
+      { fecha:'2025-08-01', paisId:'PA', ciudadId:'PTY', orgId:'ORG05', servicios:['TS01','TS03'], obs:'Atención pediátrica. Evaluación médica general.' },
       { fecha:'2025-08-29', paisId:'CR', ciudadId:'SJO', orgId:'ORG07', servicios:['TS07','TS01'], obs:'Integrada al programa educativo del centro.' },
     ]
   },
@@ -869,6 +875,7 @@ const MIGRANTES = [
     vulnerabilidad: 'alta',
     notas: 'Menor no acompañado (19 años). Sin documentos completos. Requiere seguimiento urgente.',
     ruta: [
+      { fecha:'2025-10-10', paisId:'VE', ciudadId:'SCR', orgId:null, servicios:[], obs:'Salida desde San Cristóbal. Viajaba en grupo informal sin adulto referente.' },
       { fecha:'2025-11-01', paisId:'CO', ciudadId:'CUC', orgId:'ORG03', servicios:['TS01','TS02','TS04'], obs:'Llegó sin acompañante. Protocolo de menor activado.' },
     ]
   },
@@ -974,6 +981,7 @@ const MIGRANTES = [
     vulnerabilidad: 'alta',
     notas: 'Adulta mayor. Necesita medicamentos crónicos. Sola, sin red familiar.',
     ruta: [
+      { fecha:'2025-09-20', paisId:'VE', ciudadId:'MAR', orgId:'ORG02', servicios:['TS01','TS03'], obs:'Registro previo. Condición médica crónica documentada.' },
       { fecha:'2025-10-17', paisId:'CO', ciudadId:'CUC', orgId:'ORG03', servicios:['TS01','TS02','TS03','TS04'], obs:'Atención urgente. Medicamentos gestionados.' },
     ]
   },
@@ -994,6 +1002,8 @@ const MIGRANTES = [
     vulnerabilidad: 'media',
     notas: 'Albañil. Busca trabajo en Bogotá. Esposa en Ecuador.',
     ruta: [
+      { fecha:'2025-08-05', paisId:'EC', ciudadId:'GYE', orgId:null, servicios:[], obs:'Salida de Guayaquil. Viaje terrestre hacia Colombia.' },
+      { fecha:'2025-09-01', paisId:'CO', ciudadId:'CUC', orgId:'ORG03', servicios:['TS01'], obs:'Cruce fronterizo. Registro básico.' },
       { fecha:'2025-09-25', paisId:'CO', ciudadId:'BOG', orgId:'ORG04', servicios:['TS01','TS08'], obs:'Orientación laboral en sector construcción.' },
     ]
   },
@@ -1060,6 +1070,7 @@ const MIGRANTES = [
     vulnerabilidad: 'alta',
     notas: 'Habla quiché y español básico. Analfabeta funcional. Tres hijos menores.',
     ruta: [
+      { fecha:'2025-09-10', paisId:'GT', ciudadId:'GUA', orgId:null, servicios:[], obs:'Salida de Ciudad de Guatemala en grupo familiar numeroso.' },
       { fecha:'2025-10-28', paisId:'MX', ciudadId:'TAP', orgId:'ORG08', servicios:['TS01','TS02','TS03'], obs:'Atención integral. Evaluación médica de menores.' },
     ]
   },
@@ -1080,6 +1091,8 @@ const MIGRANTES = [
     vulnerabilidad: 'media',
     notas: 'Técnica en gastronomía. Busca empleo formal. Derivada a bolsa de trabajo regional.',
     ruta: [
+      { fecha:'2025-06-15', paisId:'PE', ciudadId:'LIM', orgId:null, servicios:[], obs:'Salida de Lima. Ruta terrestre hacia Colombia.' },
+      { fecha:'2025-07-20', paisId:'EC', ciudadId:'GYE', orgId:null, servicios:['TS01'], obs:'Tránsito por Guayaquil. Apoyo humanitario informal.' },
       { fecha:'2025-08-19', paisId:'CO', ciudadId:'BOG', orgId:'ORG04', servicios:['TS08','TS05'], obs:'Orientación laboral. Verificación de títulos.' },
     ]
   },
