@@ -619,16 +619,8 @@ function viewDashboard(container) {
         </div>
       </div>
 
-      <!-- GRILLA 2 COL: Rango edad niños / adultos + nexos / nivel edu -->
+      <!-- GRILLA 2 COL: nexos / nivel edu / razones / ingresos -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Rango de Edad — Menores</div></div>
-          ${ms.rangoEdadNinos.map(r=>{const t=ms.rangoEdadNinos.reduce((a,x)=>a+x.total,0);return barRow(r.label+' &nbsp;<span style="font-size:11px;color:#94A3B8;">'+r.total.toLocaleString('es')+'</span>',Math.round(r.total/t*100),'linear-gradient(90deg,#3B82F6,#60A5FA)');}).join('')}
-        </div>
-        <div class="card">
-          <div class="card-header"><div class="card-title">Rango de Edad — Adultos</div></div>
-          ${ms.rangoEdadAdultos.map(r=>{const t=ms.rangoEdadAdultos.reduce((a,x)=>a+x.total,0);return barRow(r.label+' &nbsp;<span style="font-size:11px;color:#94A3B8;">'+r.total.toLocaleString('es')+'</span>',Math.round(r.total/t*100),'linear-gradient(90deg,#8B5CF6,#A78BFA)');}).join('')}
-        </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Nexos de Llegada</div></div>
           ${ms.nexos.map(n=>barRow(n.label,n.pct,'#F59E0B')).join('')}
@@ -1013,11 +1005,9 @@ function viewMigranteListado(container, params = {}) {
         <table>
           <thead>
             <tr>
-              <th>#ID</th>
-              <th>Email</th>
               <th>Nombre</th>
-              <th>Nacionalidad</th>
-              <th>País</th>
+              <th>Cd. Entrevista</th>
+              <th>Destino Final</th>
               <th>Estado</th>
               <th>Vulnerabilidad</th>
               <th>Fecha Registro</th>
@@ -1081,28 +1071,27 @@ function renderListado() {
   if (!tbody) return;
 
   if (pagina.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🔍</div><h3>Sin resultados</h3><p>Ajusta los filtros para encontrar migrantes.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🔍</div><h3>Sin resultados</h3><p>Ajusta los filtros para encontrar migrantes.</p></div></td></tr>`;
   } else {
     tbody.innerHTML = pagina.map(m => {
-      const pais  = Helpers.paisById(m.paisActualId);
-      const nac   = AppState.catalogos.nacionalidades.find(n => n.id === m.nacionalidadId);
-      const org   = Helpers.orgById(m.orgActualId);
-      const color = avatarColor(m.id);
+      const destPais     = Helpers.paisById(m.destinoFinalPaisId);
+      const ciudadEntId  = m.ciudadEntrevistaId;
+      const ciudadEntLabel = ciudadEntId
+        ? (AppState.catalogos.ciudades?.find(c => c.id === ciudadEntId)?.label || ciudadEntId)
+        : '—';
+      const color    = avatarColor(m.id);
       const fechaReg = Helpers.formatFecha(m.fechaRegistro);
       return `<tr style="cursor:pointer;" onclick="navigate('/migrante/detalle/${m.id}')">
-        <td onclick="event.stopPropagation()"><code style="font-size:11px;color:#64748B;background:#F1F5F9;padding:2px 6px;border-radius:4px;">${m.id}</code></td>
-        <td style="font-size:12px;color:#2563EB;">${m.email || '<span style="color:#CBD5E1;">—</span>'}</td>
         <td>
           <div class="flex gap-8" style="align-items:center;">
             <div class="avatar avatar-sm avatar-${color}">${avatarIniciales(Helpers.nombreCompleto(m))}</div>
             <div>
               <div style="font-size:13px;font-weight:600;">${Helpers.nombreCompleto(m)}</div>
-              <div style="font-size:11px;color:#94A3B8;">${Helpers.edad(m.fechaNacimiento)} años</div>
             </div>
           </div>
         </td>
-        <td style="font-size:12px;">${nac?.label || '—'}</td>
-        <td style="font-size:12px;">${pais?.bandera || ''} ${pais?.label || '—'}</td>
+        <td style="font-size:12px;">${ciudadEntLabel}</td>
+        <td style="font-size:12px;">${destPais?.bandera || ''} ${destPais?.label || '—'}</td>
         <td>${estadoBadge(m.estado)}</td>
         <td><span class="badge ${Helpers.vulnerabilidadBadge(m.vulnerabilidad)}">${Helpers.vulnerabilidadLabel(m.vulnerabilidad)}</span></td>
         <td style="font-size:12px;color:#64748B;">${fechaReg}</td>
@@ -3628,45 +3617,139 @@ function renderRutasMapa() {
     const m = migrantes.find(x => x.id === nnaF);
     if (m) {
       const pasos = m.ruta || [];
-      const puntos = pasos
-        .map(p => _MAP_COORDS[p.ciudadId] || _MAP_COORDS[p.paisId])
-        .filter(Boolean);
+
+      // Capital de país por defecto — para puntos de ruta sin ciudad_id
+      const _COUNTRY_CAPITAL = {
+        VE:'CCS', CO:'BOG', HT:'PAP', EC:'GYE', PE:'LIM',
+        GT:'GUA', HN:'TGU', MX:'CDM', PA:'PTY', CR:'SJO', CU:'CCS',
+      };
+
+      // Ciudad de cada organización FEM (para derivar coords desde org_id cuando no hay ciudad_id)
+      const _ORG_CIUDAD = {
+        'ORG01':'BOG', 'ORG02':'MED', 'ORG03':'CAL', 'ORG04':'CTG',
+        'ORG05':'SMA', 'ORG06':'PTY', 'ORG07':'SJO', 'ORG08':'CDM',
+        'ORG09':'GUA', 'ORG10':'TGU', 'ORG11':'CCS', 'ORG12':'CUC',
+        'ORG13':'BOG', 'ORG14':'MED', 'ORG15':'CAL', 'ORG16':'BAR',
+        'ORG17':'CTG', 'ORG18':'SMA',
+      };
+
+      // Resuelve coordenadas: ciudad exacta > ciudad de la org > capital del país > centroide
+      function _pasoCoords(p) {
+        if (p.ciudadId && _MAP_COORDS[p.ciudadId]) return _MAP_COORDS[p.ciudadId];
+        if (p.orgId && _ORG_CIUDAD[p.orgId] && _MAP_COORDS[_ORG_CIUDAD[p.orgId]])
+          return _MAP_COORDS[_ORG_CIUDAD[p.orgId]];
+        var cap = _COUNTRY_CAPITAL[p.paisId];
+        if (cap && _MAP_COORDS[cap]) return _MAP_COORDS[cap];
+        return _MAP_COORDS[p.paisId] || null;
+      }
+
+      // Etiqueta legible: ciudad exacta > ciudad de la org > capital del país
+      function _pasoLabel(p, fallback) {
+        if (p && p.ciudadId && _MAP_LABELS[p.ciudadId]) return _MAP_LABELS[p.ciudadId];
+        if (p && p.orgId && _ORG_CIUDAD[p.orgId] && _MAP_LABELS[_ORG_CIUDAD[p.orgId]])
+          return _MAP_LABELS[_ORG_CIUDAD[p.orgId]];
+        if (p && p.paisId) {
+          var cap = _COUNTRY_CAPITAL[p.paisId];
+          if (cap && _MAP_LABELS[cap]) return _MAP_LABELS[cap];
+          return _MAP_LABELS[p.paisId] || p.paisId;
+        }
+        return fallback || '—';
+      }
+
+      const puntos = pasos.map(_pasoCoords).filter(Boolean);
+
+      // Helper: línea punteada roja directa desde el último punto registrado al destino
+      function _addCorridorLine(ultimoPunto) {
+        const destId     = m.destinoFinalPaisId;
+        const destCoords = destId && _MAP_COORDS[destId];
+        if (!destCoords || !ultimoPunto) return;
+        const destLabel  = _MAP_LABELS[destId] || destId;
+
+        // Línea punteada roja directa — ruta proyectada al destino final
+        var projLine = L.polyline([ultimoPunto, destCoords], {
+          color: '#DC2626', weight: 3, opacity: 0.65,
+          dashArray: '10 7', lineJoin: 'round',
+        });
+        projLine.bindTooltip('Ruta proyectada → ' + destLabel, { sticky: true });
+        addLayer('nna_dest_line', projLine);
+
+        // Marcador final de destino (púrpura)
+        var destDot = L.circleMarker(destCoords, {
+          radius: 12, fillColor: '#7C3AED', color: '#fff', weight: 2.5, fillOpacity: 1,
+        });
+        destDot.bindPopup(
+          '<div style="font-family:Inter,sans-serif;">'
+          + '<b style="color:#7C3AED;">🎯 Destino final</b>'
+          + '<p style="margin:4px 0 0;font-size:14px;color:#1A2B4B;font-weight:700;">' + destLabel + '</p>'
+          + '<p style="margin:4px 0 0;font-size:11px;color:#94A3B8;">Trayecto proyectado desde último punto registrado</p>'
+          + '</div>',
+          { closeButton: false, maxWidth: 260 }
+        );
+        addLayer('nna_dest_punto', destDot);
+      }
 
       if (puntos.length >= 2) {
+        // Línea sólida roja — ruta real registrada
         addLayer('nna_ruta', L.polyline(puntos, {
           color: '#DC2626', weight: 4, opacity: 0.85, lineJoin: 'round',
         }));
-        puntos.forEach((pt, idx) => {
-          const paso = pasos[idx];
-          const lugLabel = _MAP_LABELS[paso?.ciudadId] || _MAP_LABELS[paso?.paisId] || ('Punto ' + (idx+1));
-          const isFirst  = idx === 0;
-          const isLast   = idx === puntos.length - 1;
-          const color    = isFirst ? '#16A34A' : isLast ? '#DC2626' : '#F59E0B';
-          const dot = L.circleMarker(pt, {
+        puntos.forEach(function(pt, idx) {
+          var paso = pasos[idx];
+          var lugLabel = _pasoLabel(paso, 'Punto ' + (idx+1));
+          var isFirst  = idx === 0;
+          var isLast   = idx === puntos.length - 1;
+          var color    = isFirst ? '#16A34A' : isLast ? '#DC2626' : '#F59E0B';
+          var dot = L.circleMarker(pt, {
             radius: isFirst || isLast ? 10 : 7,
             fillColor: color, color: '#fff', weight: 2, fillOpacity: 1,
           });
-          dot.bindPopup(`<div style="font-family:Inter,sans-serif;">
-            <b style="color:#1A2B4B;">${isFirst ? '🟢 Origen' : isLast ? '🔴 Posición actual' : '🟡 Parada ' + idx}</b>
-            <p style="margin:4px 0 0;font-size:12px;color:#475569;">${lugLabel}</p>
-            ${paso?.fecha ? '<p style="margin:2px 0 0;font-size:11px;color:#94A3B8;">' + paso.fecha + '</p>' : ''}
-          </div>`, { closeButton: false });
+          dot.bindPopup('<div style="font-family:Inter,sans-serif;">'
+            + '<b style="color:#1A2B4B;">' + (isFirst ? '🟢 Origen' : isLast ? '🔴 Posición actual' : '🟡 Parada ' + idx) + '</b>'
+            + '<p style="margin:4px 0 0;font-size:12px;color:#475569;">' + lugLabel + '</p>'
+            + (paso && paso.fecha ? '<p style="margin:2px 0 0;font-size:11px;color:#94A3B8;">' + paso.fecha + '</p>' : '')
+            + '</div>', { closeButton: false });
           addLayer('nna_punto_' + idx, dot);
         });
-        try { map.fitBounds(window._mapaRutasLayers['nna_ruta'].getBounds().pad(0.3)); } catch(e){}
+
+        // Línea proyectada desde el último punto registrado al destino
+        _addCorridorLine(puntos[puntos.length - 1]);
+
+        try {
+          var allLayers = Object.values(window._mapaRutasLayers).filter(function(l) { return l.getBounds; });
+          var bounds = allLayers.reduce(function(b, l) {
+            try { return b ? b.extend(l.getBounds()) : l.getBounds(); } catch(e) { return b; }
+          }, null);
+          if (bounds) map.fitBounds(bounds.pad(0.2));
+          else map.fitBounds(window._mapaRutasLayers['nna_ruta'].getBounds().pad(0.3));
+        } catch(e){}
+
       } else {
-        // NNA con un solo punto
-        const loc = _resolverCoordsLabel(m);
+        // Un solo punto de ruta — usar pasos[0] si existe, si no _resolverCoordsLabel
+        var _p0   = pasos.length > 0 ? pasos[0] : null;
+        var _c0   = _p0 ? _pasoCoords(_p0) : null;
+        var _l0   = _p0 ? _pasoLabel(_p0, 'Punto de atención') : null;
+        var loc   = (_c0 && _l0) ? { coords: _c0, label: _l0 } : _resolverCoordsLabel(m);
         if (loc) {
-          const dot = L.circleMarker(loc.coords, {
+          var uniqDot = L.circleMarker(loc.coords, {
             radius: 12, fillColor: '#DC2626', color: '#fff', weight: 3, fillOpacity: 1,
           });
-          dot.bindPopup(`<div style="font-family:Inter,sans-serif;">
-            <b style="color:#1A2B4B;">📍 ${loc.label}</b>
-            <p style="font-size:12px;color:#475569;margin:4px 0 0;">Un solo punto de atención registrado</p>
-          </div>`, { closeButton: false });
-          addLayer('nna_punto_unico', dot);
-          map.setView(loc.coords, 7);
+          uniqDot.bindPopup('<div style="font-family:Inter,sans-serif;">'
+            + '<b style="color:#1A2B4B;">📍 ' + loc.label + '</b>'
+            + '<p style="font-size:12px;color:#475569;margin:4px 0 0;">Punto de atención registrado</p>'
+            + '</div>', { closeButton: false });
+          addLayer('nna_punto_unico', uniqDot);
+
+          // Línea proyectada desde el punto único al destino
+          _addCorridorLine(loc.coords);
+
+          try {
+            var allLayers2 = Object.values(window._mapaRutasLayers).filter(function(l) { return l.getBounds; });
+            var bounds2 = allLayers2.reduce(function(b, l) {
+              try { return b ? b.extend(l.getBounds()) : l.getBounds(); } catch(e) { return b; }
+            }, null);
+            if (bounds2) map.fitBounds(bounds2.pad(0.2));
+            else map.setView(loc.coords, 5);
+          } catch(e) { map.setView(loc.coords, 5); }
         }
       }
     }

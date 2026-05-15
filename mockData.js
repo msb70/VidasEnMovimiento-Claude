@@ -1483,9 +1483,10 @@ const DB = {
       if (f.nacionalidadId)  r = r.filter(m=>m.nacionalidadId===f.nacionalidadId);
       if (f.vulnerabilidad)  r = r.filter(m=>m.vulnerabilidad===f.vulnerabilidad);
       if (f.q) {
-        const q = f.q.toLowerCase();
-        r = r.filter(m => Helpers.nombreCompleto(m).toLowerCase().includes(q)
-                       || m.documentoNumero.toLowerCase().includes(q));
+        // Normaliza acentos para que 'Sofia' encuentre 'Sofía', 'Gomez' encuentre 'Gómez', etc.
+        const _norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const q = _norm(f.q);
+        r = r.filter(m => _norm(Helpers.nombreCompleto(m)).includes(q));
       }
       return r;
     },
