@@ -207,13 +207,18 @@ function fromDB_migrante(row, rutaRows = [], grupoRows = []) {
 
 // ─── HELPER: FETCH PAGINADO (supera el límite de 1000 de PostgREST) ──
 
-async function fetchAllRows(table, selectStr = '*', orderCol = null, ascending = true) {
+async function fetchAllRows(table, selectStr = '*', orderCol = null, ascending = true, stableCol = null) {
   const PAGE = 1000;
   let all = [];
   let from = 0;
   while (true) {
     let q = supabaseClient.from(table).select(selectStr).range(from, from + PAGE - 1);
     if (orderCol) q = q.order(orderCol, { ascending });
+    // Siempre añadir una columna estable (única) como tiebreaker para que la
+    // paginación OFFSET sea determinista aunque muchas filas compartan el mismo
+    // valor de orderCol (ej. inserciones en batch con el mismo created_at).
+    const tie = stableCol || (orderCol !== 'id' ? 'id' : null);
+    if (tie) q = q.order(tie, { ascending: true });
     const { data, error } = await q;
     if (error) throw error;
     all = all.concat(data || []);

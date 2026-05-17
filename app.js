@@ -1010,7 +1010,7 @@ function viewMigranteListado(container, params = {}) {
               <th>Destino Final</th>
               <th>Estado</th>
               <th>Vulnerabilidad</th>
-              <th>Fecha Registro</th>
+              <th>Fecha Entrevista</th>
               <th style="text-align:right;">Acciones</th>
             </tr>
           </thead>
@@ -1080,7 +1080,7 @@ function renderListado() {
         ? (AppState.catalogos.ciudades?.find(c => c.id === ciudadEntId)?.label || ciudadEntId)
         : '—';
       const color    = avatarColor(m.id);
-      const fechaReg = Helpers.formatFecha(m.fechaRegistro);
+      const fechaReg = Helpers.formatFecha(m.fechaEntrevista || m.fechaRegistro);
       return `<tr style="cursor:pointer;" onclick="navigate('/migrante/detalle/${m.id}')">
         <td>
           <div class="flex gap-8" style="align-items:center;">
@@ -3131,11 +3131,27 @@ function viewMapaMigrantes(container) {
         </div>
         <select class="form-control" id="ruta-filtro-nna" onchange="renderRutasMapa()" style="font-size:13px;border-color:#FCD34D;background:#fff;">
           <option value="">— Seleccionar NNA —</option>
-          ${migrantes.map(m => {
-            const pasos = (m.ruta || []).length;
-            const rutaLabel = pasos > 1 ? ` · ${pasos} puntos de ruta` : ' · 1 punto';
-            return `<option value="${m.id}">${m.nombres} ${m.apellidos}${rutaLabel}</option>`;
-          }).join('')}
+          ${(() => {
+            // Agrupar por persona (nombres + apellidos) para no duplicar en el dropdown
+            const grupos = {};
+            migrantes.forEach(m => {
+              const k = m.nombres + '||' + m.apellidos;
+              if (!grupos[k]) grupos[k] = [];
+              grupos[k].push(m);
+            });
+            return Object.entries(grupos)
+              .sort(([,a],[,b]) => {
+                const la = a[0].apellidos + ' ' + a[0].nombres;
+                const lb = b[0].apellidos + ' ' + b[0].nombres;
+                return la < lb ? -1 : la > lb ? 1 : 0;
+              })
+              .map(([k, grupo]) => {
+                const m = grupo[0];
+                const totalPuntos = grupo.reduce((s, r) => s + (r.ruta||[]).length, 0);
+                const etiqueta = totalPuntos > 1 ? ` · ${totalPuntos} puntos de ruta` : ' · 1 punto';
+                return `<option value="${encodeURIComponent(k)}">${m.apellidos}, ${m.nombres}${etiqueta}</option>`;
+              }).join('');
+          })()}
         </select>
       </div>
 
@@ -3250,7 +3266,12 @@ function viewMapaMigrantes(container) {
 
 // Navega al mapa de rutas con un NNA pre-seleccionado
 function verRutaNNA(id) {
-  AppState.mapPreSelectNNA = id;
+  const _m = (AppState.migrantes || []).find(x => x.id === id);
+  if (_m) {
+    AppState.mapPreSelectNNA = encodeURIComponent(_m.nombres + '||' + _m.apellidos);
+  } else {
+    AppState.mapPreSelectNNA = id;
+  }
   // Intentar navegar al mapa de migrantes (módulo Migrante o Consulta)
   const route = window.location.hash || '';
   if (route.includes('/consulta/')) {
@@ -3614,26 +3635,46 @@ function renderRutasMapa() {
 
   // ── 3. Ruta individual de un NNA ──
   if (nnaF) {
-    const m = migrantes.find(x => x.id === nnaF);
-    if (m) {
-      const pasos = m.ruta || [];
+    // nnaF es una clave de persona codificada: encodeURIComponent("nombres||apellidos")
+    const _decoded   = decodeURIComponent(nnaF);
+    const _sepIdx    = _decoded.indexOf('||');
+    const _pNombres  = _decoded.substring(0, _sepIdx);
+    const _pApellidos = _decoded.substring(_sepIdx + 2);
 
-      // Capital de país por defecto — para puntos de ruta sin ciudad_id
+    // Reunir todos los registros DB de esta persona y ordenarlos por fecha de entrevista ASC
+    // (el más antiguo = primer punto de ruta; el más reciente = segundo punto)
+    const grupoPersona = migrantes
+      .filter(x => x.nombres === _pNombres && x.apellidos === _pApellidos)
+      .sort((a, b) => {
+        const fa = a.ruta && a.ruta[0] ? a.ruta[0].fecha : '';
+        const fb = b.ruta && b.ruta[0] ? b.ruta[0].fecha : '';
+        return fa < fb ? -1 : fa > fb ? 1 : 0;
+      });
+
+    if (grupoPersona.length > 0) {
+      const personaUlt = grupoPersona[grupoPersona.length - 1];
+
+      // Pasos: 1 paso por registro (el único punto de ruta de cada registro DB), en orden cronológico
+      // → Punto 1 = ciudad de la entrevista más antigua
+      // → Punto 2 = ciudad de la entrevista más reciente
+      const pasos = grupoPersona.map(reg => reg.ruta && reg.ruta[0] ? reg.ruta[0] : null).filter(Boolean);
+
+      // Destino proyectado: del registro más reciente (última entrevista)
+      const _destinoFinalId = personaUlt.destinoFinalPaisId;
+
+      // Mapeo org → ciudad real (actualizado con el esquema de datos actual)
       const _COUNTRY_CAPITAL = {
         VE:'CCS', CO:'BOG', HT:'PAP', EC:'GYE', PE:'LIM',
         GT:'GUA', HN:'TGU', MX:'CDM', PA:'PTY', CR:'SJO', CU:'CCS',
       };
-
-      // Ciudad de cada organización FEM (para derivar coords desde org_id cuando no hay ciudad_id)
       const _ORG_CIUDAD = {
-        'ORG01':'BOG', 'ORG02':'MED', 'ORG03':'CAL', 'ORG04':'CTG',
-        'ORG05':'SMA', 'ORG06':'PTY', 'ORG07':'SJO', 'ORG08':'CDM',
-        'ORG09':'GUA', 'ORG10':'TGU', 'ORG11':'CCS', 'ORG12':'CUC',
-        'ORG13':'BOG', 'ORG14':'MED', 'ORG15':'CAL', 'ORG16':'BAR',
-        'ORG17':'CTG', 'ORG18':'SMA',
+        'ORG01':'CCS','ORG02':'CCS','ORG03':'CUC','ORG04':'CUC',
+        'ORG05':'BOG','ORG06':'BOG','ORG07':'MED','ORG08':'MED',
+        'ORG09':'CAL','ORG10':'CAL','ORG11':'BAR','ORG12':'BAR',
+        'ORG13':'CTG','ORG14':'CTG','ORG15':'SMA','ORG16':'SMA',
+        'ORG17':'BOG','ORG18':'SMA',
       };
 
-      // Resuelve coordenadas: ciudad exacta > ciudad de la org > capital del país > centroide
       function _pasoCoords(p) {
         if (p.ciudadId && _MAP_COORDS[p.ciudadId]) return _MAP_COORDS[p.ciudadId];
         if (p.orgId && _ORG_CIUDAD[p.orgId] && _MAP_COORDS[_ORG_CIUDAD[p.orgId]])
@@ -3643,7 +3684,6 @@ function renderRutasMapa() {
         return _MAP_COORDS[p.paisId] || null;
       }
 
-      // Etiqueta legible: ciudad exacta > ciudad de la org > capital del país
       function _pasoLabel(p, fallback) {
         if (p && p.ciudadId && _MAP_LABELS[p.ciudadId]) return _MAP_LABELS[p.ciudadId];
         if (p && p.orgId && _ORG_CIUDAD[p.orgId] && _MAP_LABELS[_ORG_CIUDAD[p.orgId]])
@@ -3658,22 +3698,18 @@ function renderRutasMapa() {
 
       const puntos = pasos.map(_pasoCoords).filter(Boolean);
 
-      // Helper: línea punteada roja directa desde el último punto registrado al destino
+      // Línea punteada al destino proyectado (desde el último punto registrado)
       function _addCorridorLine(ultimoPunto) {
-        const destId     = m.destinoFinalPaisId;
+        const destId     = _destinoFinalId;
         const destCoords = destId && _MAP_COORDS[destId];
         if (!destCoords || !ultimoPunto) return;
         const destLabel  = _MAP_LABELS[destId] || destId;
-
-        // Línea punteada roja directa — ruta proyectada al destino final
         var projLine = L.polyline([ultimoPunto, destCoords], {
           color: '#DC2626', weight: 3, opacity: 0.65,
           dashArray: '10 7', lineJoin: 'round',
         });
         projLine.bindTooltip('Ruta proyectada → ' + destLabel, { sticky: true });
         addLayer('nna_dest_line', projLine);
-
-        // Marcador final de destino (púrpura)
         var destDot = L.circleMarker(destCoords, {
           radius: 12, fillColor: '#7C3AED', color: '#fff', weight: 2.5, fillOpacity: 1,
         });
@@ -3681,7 +3717,7 @@ function renderRutasMapa() {
           '<div style="font-family:Inter,sans-serif;">'
           + '<b style="color:#7C3AED;">🎯 Destino final</b>'
           + '<p style="margin:4px 0 0;font-size:14px;color:#1A2B4B;font-weight:700;">' + destLabel + '</p>'
-          + '<p style="margin:4px 0 0;font-size:11px;color:#94A3B8;">Trayecto proyectado desde último punto registrado</p>'
+          + '<p style="margin:4px 0 0;font-size:11px;color:#94A3B8;">Destino declarado en última entrevista</p>'
           + '</div>',
           { closeButton: false, maxWidth: 260 }
         );
@@ -3689,31 +3725,29 @@ function renderRutasMapa() {
       }
 
       if (puntos.length >= 2) {
-        // Línea sólida roja — ruta real registrada
+        // Línea sólida — ruta entre puntos de atención (más antiguo → más reciente)
         addLayer('nna_ruta', L.polyline(puntos, {
           color: '#DC2626', weight: 4, opacity: 0.85, lineJoin: 'round',
         }));
         puntos.forEach(function(pt, idx) {
-          var paso = pasos[idx];
+          var paso     = pasos[idx];
           var lugLabel = _pasoLabel(paso, 'Punto ' + (idx+1));
           var isFirst  = idx === 0;
           var isLast   = idx === puntos.length - 1;
-          var color    = isFirst ? '#16A34A' : isLast ? '#DC2626' : '#F59E0B';
+          var color    = isFirst ? '#16A34A' : '#DC2626';
+          var titulo   = isFirst ? '🟢 1ª entrevista' : '🔴 2ª entrevista';
           var dot = L.circleMarker(pt, {
-            radius: isFirst || isLast ? 10 : 7,
-            fillColor: color, color: '#fff', weight: 2, fillOpacity: 1,
+            radius: 10, fillColor: color, color: '#fff', weight: 2, fillOpacity: 1,
           });
           dot.bindPopup('<div style="font-family:Inter,sans-serif;">'
-            + '<b style="color:#1A2B4B;">' + (isFirst ? '🟢 Origen' : isLast ? '🔴 Posición actual' : '🟡 Parada ' + idx) + '</b>'
+            + '<b style="color:#1A2B4B;">' + titulo + '</b>'
             + '<p style="margin:4px 0 0;font-size:12px;color:#475569;">' + lugLabel + '</p>'
             + (paso && paso.fecha ? '<p style="margin:2px 0 0;font-size:11px;color:#94A3B8;">' + paso.fecha + '</p>' : '')
             + '</div>', { closeButton: false });
           addLayer('nna_punto_' + idx, dot);
         });
-
-        // Línea proyectada desde el último punto registrado al destino
+        // Punto 3: destino proyectado desde el último punto registrado
         _addCorridorLine(puntos[puntos.length - 1]);
-
         try {
           var allLayers = Object.values(window._mapaRutasLayers).filter(function(l) { return l.getBounds; });
           var bounds = allLayers.reduce(function(b, l) {
@@ -3724,11 +3758,11 @@ function renderRutasMapa() {
         } catch(e){}
 
       } else {
-        // Un solo punto de ruta — usar pasos[0] si existe, si no _resolverCoordsLabel
-        var _p0   = pasos.length > 0 ? pasos[0] : null;
-        var _c0   = _p0 ? _pasoCoords(_p0) : null;
-        var _l0   = _p0 ? _pasoLabel(_p0, 'Punto de atención') : null;
-        var loc   = (_c0 && _l0) ? { coords: _c0, label: _l0 } : _resolverCoordsLabel(m);
+        // Un solo punto registrado
+        var _p0  = pasos.length > 0 ? pasos[0] : null;
+        var _c0  = _p0 ? _pasoCoords(_p0) : null;
+        var _l0  = _p0 ? _pasoLabel(_p0, 'Punto de atención') : null;
+        var loc  = (_c0 && _l0) ? { coords: _c0, label: _l0 } : _resolverCoordsLabel(grupoPersona[0]);
         if (loc) {
           var uniqDot = L.circleMarker(loc.coords, {
             radius: 12, fillColor: '#DC2626', color: '#fff', weight: 3, fillOpacity: 1,
@@ -3738,10 +3772,7 @@ function renderRutasMapa() {
             + '<p style="font-size:12px;color:#475569;margin:4px 0 0;">Punto de atención registrado</p>'
             + '</div>', { closeButton: false });
           addLayer('nna_punto_unico', uniqDot);
-
-          // Línea proyectada desde el punto único al destino
           _addCorridorLine(loc.coords);
-
           try {
             var allLayers2 = Object.values(window._mapaRutasLayers).filter(function(l) { return l.getBounds; });
             var bounds2 = allLayers2.reduce(function(b, l) {
@@ -3795,11 +3826,14 @@ function renderRutasMapa() {
   const badge = document.getElementById('ruta-conteo-badge');
   if (badge) {
     if (nnaF) {
-      const m = migrantes.find(x => x.id === nnaF);
-      if (m) {
-        const pasos = (m.ruta || []).length;
-        badge.innerHTML = `Mostrando ruta de <strong style="color:#DC2626;">${m.nombres} ${m.apellidos}</strong> · ${pasos || 1} punto${pasos !== 1 ? 's' : ''} de atención registrado${pasos !== 1 ? 's' : ''}`;
-      }
+      const _dec = decodeURIComponent(nnaF);
+      const _sep = _dec.indexOf('||');
+      const _pNom = _sep >= 0 ? _dec.substring(0, _sep) : _dec;
+      const _pApe = _sep >= 0 ? _dec.substring(_sep + 2) : '';
+      const _grp = migrantes.filter(x => x.nombres === _pNom && x.apellidos === _pApe);
+      const _totalPts = _grp.reduce((s, r) => s + (r.ruta || []).length, 0) || 1;
+      const _nombre = _pNom + ' ' + _pApe;
+      badge.innerHTML = `Mostrando ruta de <strong style="color:#DC2626;">${_nombre.trim()}</strong> · ${_totalPts} punto${_totalPts !== 1 ? 's' : ''} de atención registrado${_totalPts !== 1 ? 's' : ''}`;
     } else if (ciudadF) {
       const c = ciudadesData.find(x => x.ciudadId === ciudadF);
       if (c) badge.innerHTML = `Ciudad seleccionada: <strong style="color:#1A2B4B;">${c.label}</strong> · <strong>${c.nnaUnicos.toLocaleString('es')}</strong> NNA únicos · <strong>${c.atenciones.toLocaleString('es')}</strong> atenciones`;
