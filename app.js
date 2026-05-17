@@ -492,7 +492,7 @@ function viewDashboard(container) {
       <div class="card" style="margin-bottom:20px;padding:14px 20px;">
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
           <span style="font-size:13px;font-weight:600;color:#475569;">Filtros:</span>
-          <select id="db-f-pais" class="form-control" style="width:auto;min-width:150px;" onchange="const sc=document.getElementById('db-f-ciudad');if(sc)sc.value='';actualizarDashboard()">
+          <select id="db-f-pais" class="form-control" style="width:auto;min-width:150px;" onchange="const sc=document.getElementById('db-f-ciudad');if(sc)sc.value='';const so=document.getElementById('db-f-ong');if(so)so.value='';actualizarDashboard()">
             <option value="">Todos los países</option>
             ${AppState.catalogos.paises.filter(p=>p.id==='CO'||p.id==='VE').map(p=>`<option value="${p.id}">${p.bandera} ${p.label}</option>`).join('')}
           </select>
@@ -942,6 +942,22 @@ function actualizarDashboard() {
     selCiudad.innerHTML = `<option value="">Todas las ciudades</option>` +
       ciudadesSource.map(c => `<option value="${c.id}"${c.id === currentCity ? ' selected' : ''}>${c.label}</option>`).join('');
   }
+
+  // Al cambiar país o ciudad, filtrar ONGs del selector
+  const selOng = document.getElementById('db-f-ong');
+  if (selOng) {
+    let ongsSource;
+    if (ciudadId) {
+      ongsSource = AppState.organizaciones.filter(o => o.ciudadId === ciudadId);
+    } else if (paisId) {
+      ongsSource = AppState.organizaciones.filter(o => o.paisId === paisId);
+    } else {
+      ongsSource = AppState.organizaciones;
+    }
+    const currentOrg = selOng.value;
+    selOng.innerHTML = `<option value="">Todas las ONGs</option>` +
+      ongsSource.map(o => `<option value="${o.id}"${o.id === currentOrg ? ' selected' : ''}>${o.nombre}</option>`).join('');
+  }
 }
 
 function limpiarFiltrosDashboard() {
@@ -955,6 +971,12 @@ function limpiarFiltrosDashboard() {
     selCiudad.innerHTML = `<option value="">Todas las ciudades</option>` +
       AppState.catalogos.ciudades.filter(c=>c.paisId==='CO'||c.paisId==='VE').map(c => `<option value="${c.id}">${c.label}</option>`).join('');
   }
+  // Restaurar selector de ONGs (todas)
+  const selOng = document.getElementById('db-f-ong');
+  if (selOng) {
+    selOng.innerHTML = `<option value="">Todas las ONGs</option>` +
+      AppState.organizaciones.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+  }
   actualizarDashboard();
 }
 
@@ -962,8 +984,15 @@ function limpiarFiltrosDashboard() {
 
 function viewMigranteListado(container, params = {}) {
   withLoader(container, () => {
-    const paises = AppState.catalogos.paises;
-    const orgs   = AppState.organizaciones;
+    const orgs = AppState.organizaciones;
+
+    // Países únicos de las entrevistas en Supabase
+    const _paisesIds = [...new Set(AppState.migrantes.map(m => m.paisEntrevistaId || m.pais_entrevista_id).filter(Boolean))];
+    const paisesEntrevista = AppState.catalogos.paises.filter(p => _paisesIds.includes(p.id));
+
+    // Ciudades únicas de las entrevistas
+    const _ciudadesIds = [...new Set(AppState.migrantes.map(m => m.ciudadEntrevistaId || m.ciudad_entrevista_id).filter(Boolean))];
+    const ciudadesEntrevista = AppState.catalogos.ciudades.filter(c => _ciudadesIds.includes(c.id));
 
     container.innerHTML = `
       <div class="page-header">
@@ -986,12 +1015,13 @@ function viewMigranteListado(container, params = {}) {
           <span class="search-icon">🔍</span>
           <input type="text" id="search-q" placeholder="Buscar por nombre o email..." oninput="aplicarFiltroListado()"/>
         </div>
-        <select class="filter-select" id="filter-pais-listado" onchange="aplicarFiltroListado()">
+        <select class="filter-select" id="filter-pais-listado" onchange="onCambiarPaisListado()">
           <option value="">Todos los países</option>
-          ${paises.map(p => `<option value="${p.id}">${p.bandera} ${p.label}</option>`).join('')}
+          ${paisesEntrevista.map(p => `<option value="${p.id}">${p.bandera} ${p.label}</option>`).join('')}
         </select>
-        <select class="filter-select" id="filter-ciudad-listado" onchange="aplicarFiltroListado()">
+        <select class="filter-select" id="filter-ciudad-listado" onchange="onCambiarCiudadListado()">
           <option value="">Todas las ciudades</option>
+          ${ciudadesEntrevista.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
         </select>
         <select class="filter-select" id="filter-ong-listado" onchange="aplicarFiltroListado()">
           <option value="">Todas las ONGs</option>
@@ -1037,9 +1067,81 @@ function aplicarFiltroListado() {
 function limpiarFiltrosListado() {
   document.getElementById('search-q').value = '';
   document.getElementById('filter-pais-listado').value = '';
-  document.getElementById('filter-ciudad-listado').value = '';
-  document.getElementById('filter-ong-listado').value = '';
+
+  // Restaurar ciudades a todas las de entrevista
+  const _selCiudadL = document.getElementById('filter-ciudad-listado');
+  if (_selCiudadL) {
+    const _cids = [...new Set(AppState.migrantes.map(m => m.ciudadEntrevistaId || m.ciudad_entrevista_id).filter(Boolean))];
+    const _cts  = AppState.catalogos.ciudades.filter(c => _cids.includes(c.id));
+    _selCiudadL.innerHTML = `<option value="">Todas las ciudades</option>` +
+      _cts.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+  }
+
+  // Restaurar ONGs a todas
+  const _selOngL = document.getElementById('filter-ong-listado');
+  if (_selOngL) {
+    _selOngL.innerHTML = `<option value="">Todas las ONGs</option>` +
+      AppState.organizaciones.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+  }
+
   renderListado();
+}
+
+// Cascada listado: al cambiar país
+function onCambiarPaisListado() {
+  const paisId = document.getElementById('filter-pais-listado')?.value || '';
+
+  // Filtrar ciudades de entrevista del país seleccionado
+  const _selCiudad = document.getElementById('filter-ciudad-listado');
+  if (_selCiudad) {
+    const _cids = [...new Set(
+      AppState.migrantes
+        .filter(m => !paisId || (m.paisEntrevistaId || m.pais_entrevista_id) === paisId)
+        .map(m => m.ciudadEntrevistaId || m.ciudad_entrevista_id)
+        .filter(Boolean)
+    )];
+    const _cts = AppState.catalogos.ciudades.filter(c => _cids.includes(c.id));
+    _selCiudad.value = '';
+    _selCiudad.innerHTML = `<option value="">Todas las ciudades</option>` +
+      _cts.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+  }
+
+  // Filtrar ONGs del país seleccionado
+  const _selOrg = document.getElementById('filter-ong-listado');
+  if (_selOrg) {
+    const _orgs = paisId
+      ? AppState.organizaciones.filter(o => o.paisId === paisId)
+      : AppState.organizaciones;
+    _selOrg.value = '';
+    _selOrg.innerHTML = `<option value="">Todas las ONGs</option>` +
+      _orgs.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+  }
+
+  aplicarFiltroListado();
+}
+
+// Cascada listado: al cambiar ciudad
+function onCambiarCiudadListado() {
+  const ciudadId = document.getElementById('filter-ciudad-listado')?.value || '';
+  const paisId   = document.getElementById('filter-pais-listado')?.value || '';
+
+  // Filtrar ONGs de la ciudad seleccionada (o del país si no hay ciudad)
+  const _selOrg = document.getElementById('filter-ong-listado');
+  if (_selOrg) {
+    let _orgs;
+    if (ciudadId) {
+      _orgs = AppState.organizaciones.filter(o => o.ciudadId === ciudadId);
+    } else if (paisId) {
+      _orgs = AppState.organizaciones.filter(o => o.paisId === paisId);
+    } else {
+      _orgs = AppState.organizaciones;
+    }
+    _selOrg.value = '';
+    _selOrg.innerHTML = `<option value="">Todas las ONGs</option>` +
+      _orgs.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+  }
+
+  aplicarFiltroListado();
 }
 
 function renderListado() {
@@ -1050,8 +1152,8 @@ function renderListado() {
 
   const filtros = {};
   if (q)      filtros.q = q;
-  if (pais)   filtros.paisActualId = pais;
-  if (ciudad) filtros.ciudad = ciudad;
+  if (pais)   filtros.paisEntrevistaId = pais;
+  if (ciudad) filtros.ciudadEntrevistaId = ciudad;
   if (ong)    filtros.orgActualId = ong;
 
   // Aplicar filtro de org del usuario activo
@@ -3131,27 +3233,7 @@ function viewMapaMigrantes(container) {
         </div>
         <select class="form-control" id="ruta-filtro-nna" onchange="renderRutasMapa()" style="font-size:13px;border-color:#FCD34D;background:#fff;">
           <option value="">— Seleccionar NNA —</option>
-          ${(() => {
-            // Agrupar por persona (nombres + apellidos) para no duplicar en el dropdown
-            const grupos = {};
-            migrantes.forEach(m => {
-              const k = m.nombres + '||' + m.apellidos;
-              if (!grupos[k]) grupos[k] = [];
-              grupos[k].push(m);
-            });
-            return Object.entries(grupos)
-              .sort(([,a],[,b]) => {
-                const la = a[0].apellidos + ' ' + a[0].nombres;
-                const lb = b[0].apellidos + ' ' + b[0].nombres;
-                return la < lb ? -1 : la > lb ? 1 : 0;
-              })
-              .map(([k, grupo]) => {
-                const m = grupo[0];
-                const totalPuntos = grupo.reduce((s, r) => s + (r.ruta||[]).length, 0);
-                const etiqueta = totalPuntos > 1 ? ` · ${totalPuntos} puntos de ruta` : ' · 1 punto';
-                return `<option value="${encodeURIComponent(k)}">${m.apellidos}, ${m.nombres}${etiqueta}</option>`;
-              }).join('');
-          })()}
+          ${_buildNNAOptions('', migrantes)}
         </select>
       </div>
 
@@ -3513,6 +3595,53 @@ function limpiarMapaBusqueda() {
 
 // ─── MAPA DE RUTAS: renderizado y filtros ─────────────────────────
 
+// Construye las <option> del selector de NNA, filtradas por ciudad FEM si se indica.
+// Para que un NNA aparezca, debe tener al menos un paso de ruta (o su org de entrevista)
+// vinculado a la ciudad seleccionada.
+function _buildNNAOptions(ciudadF, migrantes) {
+  // Mapa orgId → ciudadId para lookup rápido
+  const _orgCiudad = {};
+  AppState.organizaciones.forEach(o => { _orgCiudad[o.id] = o.ciudadId; });
+
+  // Función que decide si un registro de migrante "pasa" por la ciudad
+  function _pasaPorCiudad(m) {
+    // 1. Algún paso de la ruta tiene esa ciudad directamente
+    if ((m.ruta || []).some(p =>
+      p.ciudadId === ciudadF || _orgCiudad[p.orgId] === ciudadF
+    )) return true;
+    // 2. La entrevista fue en esa ciudad
+    if ((m.ciudadEntrevistaId || m.ciudad_entrevista_id) === ciudadF) return true;
+    // 3. La org del registro pertenece a esa ciudad
+    const orgId = m.orgId || m.orgActualId;
+    if (orgId && _orgCiudad[orgId] === ciudadF) return true;
+    return false;
+  }
+
+  // Si hay filtro de ciudad, reducir la lista
+  const lista = ciudadF ? migrantes.filter(_pasaPorCiudad) : migrantes;
+
+  // Agrupar por persona (nombres + apellidos)
+  const grupos = {};
+  lista.forEach(m => {
+    const k = m.nombres + '||' + m.apellidos;
+    if (!grupos[k]) grupos[k] = [];
+    grupos[k].push(m);
+  });
+
+  return Object.entries(grupos)
+    .sort(([,a],[,b]) => {
+      const la = a[0].apellidos + ' ' + a[0].nombres;
+      const lb = b[0].apellidos + ' ' + b[0].nombres;
+      return la < lb ? -1 : la > lb ? 1 : 0;
+    })
+    .map(([k, grupo]) => {
+      const m = grupo[0];
+      const totalPuntos = grupo.reduce((s, r) => s + (r.ruta||[]).length, 0);
+      const etiqueta = totalPuntos > 1 ? ` · ${totalPuntos} puntos de ruta` : ' · 1 punto';
+      return `<option value="${encodeURIComponent(k)}">${m.apellidos}, ${m.nombres}${etiqueta}</option>`;
+    }).join('');
+}
+
 function renderRutasMapa() {
   const map = window._mapaRutasInstance;
   if (!map) return;
@@ -3522,13 +3651,24 @@ function renderRutasMapa() {
   Object.values(layers).forEach(l => { try { map.removeLayer(l); } catch(e){} });
   window._mapaRutasLayers = {};
 
-  const nnaF    = (document.getElementById('ruta-filtro-nna')    || {}).value || '';
   const ciudadF = (document.getElementById('ruta-filtro-ciudad') || {}).value || '';
   const modo    = (document.getElementById('ruta-modo')          || {}).value || 'rutas';
 
   const ms           = AppState.mockStats;
   const ciudadesData = ms.distribucionCiudadesFEM || [];
   const migrantes    = getVisibleMigrantes();
+
+  // Reconstruir el selector de NNA filtrado por ciudad antes de leer su valor
+  const _nnaSelect = document.getElementById('ruta-filtro-nna');
+  if (_nnaSelect) {
+    const _prevNna = _nnaSelect.value;
+    _nnaSelect.innerHTML = `<option value="">— Seleccionar NNA —</option>` +
+      _buildNNAOptions(ciudadF, migrantes);
+    // Mantener selección solo si el NNA sigue en la lista filtrada
+    const _sigueValido = _prevNna && [..._nnaSelect.options].some(o => o.value === _prevNna);
+    _nnaSelect.value = _sigueValido ? _prevNna : '';
+  }
+  const nnaF = (_nnaSelect || {}).value || '';
 
   // Helper: añadir capa registrada
   function addLayer(key, layer) {
@@ -3585,8 +3725,8 @@ function renderRutasMapa() {
       addLayer('fem_label_'  + i, L.marker(coords, { icon: labelIcon, interactive: false }));
     });
 
-    // ── 2. Rutas agregadas de fondo (sin filtro de ciudad) ──
-    if (!ciudadF) {
+    // ── 2. Rutas agregadas — todas o filtradas por ciudad ──
+    {
       const RUTAS_AGRUP = [
         { from:'CCS', to:'SCR', vol:320,  label:'Caracas → San Cristóbal' },
         { from:'CCS', to:'MAR', vol:180,  label:'Caracas → Maracaibo' },
@@ -3609,12 +3749,20 @@ function renderRutasMapa() {
         { from:'CDM', to:'MIA', vol: 30,  label:'México → Miami' },
         { from:'CDM', to:'HOU', vol: 28,  label:'México → Houston' },
       ];
-      RUTAS_AGRUP.forEach((r, i) => {
+      // Si hay ciudad seleccionada, mostrar solo rutas que pasen por ella
+      const rutasAMostrar = ciudadF
+        ? RUTAS_AGRUP.filter(r => r.from === ciudadF || r.to === ciudadF)
+        : RUTAS_AGRUP;
+      rutasAMostrar.forEach((r, i) => {
         const c1 = _MAP_COORDS[r.from], c2 = _MAP_COORDS[r.to];
         if (!c1 || !c2) return;
         const weight = Math.max(1.5, Math.min(1 + r.vol / 120, 6));
+        // Rutas filtradas se destacan en rojo; de fondo, en azul tenue
         const line = L.polyline([c1, c2], {
-          color: '#2563EB', weight, opacity: 0.32, dashArray: '6 4',
+          color:   ciudadF ? '#DC2626' : '#2563EB',
+          weight:  ciudadF ? Math.min(weight * 1.4, 8) : weight,
+          opacity: ciudadF ? 0.75 : 0.32,
+          dashArray: '6 4',
         });
         line.bindTooltip(r.label + ' · ~' + r.vol + ' NNA', { sticky: true });
         addLayer('ruta_agrup_' + i, line);

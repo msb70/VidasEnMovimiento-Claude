@@ -1476,10 +1476,13 @@ const DB = {
   migrantes: {
     list: (f={}) => {
       let r = [...AppState.migrantes];
-      if (f.estado)          r = r.filter(m=>m.estado===f.estado);
-      if (f.paisActualId)    r = r.filter(m=>m.paisActualId===f.paisActualId);
-      if (f.orgActualId)     r = r.filter(m=>m.orgActualId===f.orgActualId);
-      if (f.generoId)        r = r.filter(m=>m.generoId===f.generoId);
+      if (f.estado)              r = r.filter(m=>m.estado===f.estado);
+      if (f.paisActualId)        r = r.filter(m=>m.paisActualId===f.paisActualId);
+      // Filtros por país y ciudad de entrevista (usados en listado y consulta)
+      if (f.paisEntrevistaId)    r = r.filter(m=>(m.paisEntrevistaId||m.pais_entrevista_id)===f.paisEntrevistaId);
+      if (f.ciudadEntrevistaId)  r = r.filter(m=>(m.ciudadEntrevistaId||m.ciudad_entrevista_id)===f.ciudadEntrevistaId);
+      if (f.orgActualId)         r = r.filter(m=>m.orgActualId===f.orgActualId||m.orgId===f.orgActualId);
+      if (f.generoId)            r = r.filter(m=>m.generoId===f.generoId);
       if (f.nacionalidadId)  r = r.filter(m=>m.nacionalidadId===f.nacionalidadId);
       if (f.vulnerabilidad)  r = r.filter(m=>m.vulnerabilidad===f.vulnerabilidad);
       if (f.q) {
