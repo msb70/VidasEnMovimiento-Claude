@@ -213,13 +213,13 @@ const RAZONES_EMIGRACION = [
 
 const TIPOS_SERVICIO = [
   { id: 'TS01', label: 'Alimentación',         icono: '🍽️', color: '#F59E0B' },
-  { id: 'TS02', label: 'Refugio temporal',     icono: '🏠',  color: '#3B82F6' },
+  { id: 'TS02', label: 'Refugio temporal',     icono: '🏠',  color: '#003B8F' },
   { id: 'TS03', label: 'Atención médica',      icono: '🏥',  color: '#EF4444' },
   { id: 'TS04', label: 'Atención psicológica', icono: '🧠',  color: '#8B5CF6' },
-  { id: 'TS05', label: 'Asesoría legal',       icono: '⚖️',  color: '#10B981' },
+  { id: 'TS05', label: 'Asesoría legal',       icono: '⚖️',  color: '#17A65A' },
   { id: 'TS06', label: 'Transporte',           icono: '🚌',  color: '#6B7280' },
   { id: 'TS07', label: 'Educación',            icono: '📚',  color: '#EC4899' },
-  { id: 'TS08', label: 'Inserción laboral',    icono: '💼',  color: '#14B8A6' },
+  { id: 'TS08', label: 'Inserción laboral',    icono: '💼',  color: '#1AA6B7' },
 ];
 
 const GENERACION_INGRESOS = [
@@ -1406,12 +1406,12 @@ const Helpers = {
   })[e] || e,
 
   estadoColor: e => ({
-    en_transito:'#F59E0B', atendido:'#3B82F6',
-    derivado:'#8B5CF6', ubicado:'#10B981', archivado:'#6B7280'
+    en_transito:'#F59E0B', atendido:'#003B8F',
+    derivado:'#8B5CF6', ubicado:'#17A65A', archivado:'#6B7280'
   })[e] || '#6B7280',
 
   vulnerabilidadLabel: v => ({alta:'Alta',media:'Media',baja:'Baja'})[v] || v,
-  vulnerabilidadColor: v => ({alta:'#EF4444',media:'#F59E0B',baja:'#10B981'})[v] || '#6B7280',
+  vulnerabilidadColor: v => ({alta:'#EF4444',media:'#F59E0B',baja:'#17A65A'})[v] || '#6B7280',
   vulnerabilidadBadge: v => ({alta:'badge-red',media:'badge-yellow',baja:'badge-green'})[v] || 'badge-gray',
 
   formatFecha: f => {

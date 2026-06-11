@@ -561,20 +561,20 @@ function showCatalogModal(clave, titulo, item = null) {
       <input type="${f.type || 'text'}" id="${modalId}-${f.key}" value="${item ? (item[f.key] || '') : ''}"
         ${isEdit && f.key === 'id' ? 'readonly style="background:#F8FAFC;color:#94A3B8;"' : ''}
         style="width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;"
-        onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E2E8F0'"/>
+        onfocus="this.style.borderColor='#003B8F'" onblur="this.style.borderColor='#E2E8F0'"/>
     </div>`).join('');
 
   const modalHTML = `
     <div id="${modalId}" style="position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);">
       <div style="background:#fff;border-radius:16px;padding:32px;width:100%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-          <h3 style="font-size:16px;font-weight:800;color:#1A2B4B;margin:0;">${isEdit ? 'Editar' : 'Nuevo'} — ${titulo}</h3>
+          <h3 style="font-size:16px;font-weight:800;color:#002F6C;margin:0;">${isEdit ? 'Editar' : 'Nuevo'} — ${titulo}</h3>
           <button onclick="document.getElementById('${modalId}').remove()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#94A3B8;line-height:1;">×</button>
         </div>
         ${fieldsHTML}
         <div style="display:flex;gap:10px;margin-top:24px;">
           <button onclick="document.getElementById('${modalId}').remove()" style="flex:1;padding:11px;border:1.5px solid #E2E8F0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13px;color:#475569;">Cancelar</button>
-          <button id="${modalId}-save" onclick="saveCatalogModal('${modalId}','${clave}','${isEdit ? item.id : ''}')" style="flex:2;padding:11px;border:none;border-radius:8px;background:#2563EB;color:#fff;cursor:pointer;font-weight:700;font-size:13px;">${isEdit ? 'Guardar cambios' : 'Crear registro'}</button>
+          <button id="${modalId}-save" onclick="saveCatalogModal('${modalId}','${clave}','${isEdit ? item.id : ''}')" style="flex:2;padding:11px;border:none;border-radius:8px;background:#003B8F;color:#fff;cursor:pointer;font-weight:700;font-size:13px;">${isEdit ? 'Guardar cambios' : 'Crear registro'}</button>
         </div>
       </div>
     </div>`;

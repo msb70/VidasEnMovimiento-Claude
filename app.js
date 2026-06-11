@@ -111,8 +111,8 @@ function navigate(route, params = {}) {
     content.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px;">
         <div style="font-size:56px;margin-bottom:20px;">🔒</div>
-        <h2 style="font-size:22px;font-weight:800;color:#1A2B4B;margin:0 0 10px;">Acceso restringido</h2>
-        <p style="font-size:14px;color:#64748B;max-width:380px;margin:0 0 24px;">
+        <h2 style="font-size:22px;font-weight:800;color:#002F6C;margin:0 0 10px;">Acceso restringido</h2>
+        <p style="font-size:14px;color:#4B5563;max-width:380px;margin:0 0 24px;">
           No tienes permiso para acceder a esta sección. Contacta al administrador para solicitar acceso.
         </p>
         <button class="btn btn-primary btn-sm" onclick="navigate('/migrantes/dashboard')">← Ir al Dashboard</button>
@@ -452,7 +452,7 @@ function viewDashboard(container) {
       return `<div style="margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
           <span style="color:#374151;font-weight:500;">${label}</span>
-          <span style="font-weight:700;color:#1A2B4B;">${pct}%</span>
+          <span style="font-weight:700;color:#002F6C;">${pct}%</span>
         </div>
         <div style="background:#F1F5F9;border-radius:20px;height:7px;overflow:hidden;">
           <div style="background:${color};height:100%;width:${pct}%;border-radius:20px;transition:width .5s;"></div>
@@ -465,12 +465,12 @@ function viewDashboard(container) {
         <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px;">${titulo}</div>
         <div style="display:flex;gap:8px;">
           <div style="flex:1;background:#F0FDF4;border-radius:10px;padding:10px 6px;">
-            <div style="font-size:22px;font-weight:800;color:#16A34A;">${si}%</div>
-            <div style="font-size:11px;color:#64748B;font-weight:600;">SÍ</div>
+            <div style="font-size:22px;font-weight:800;color:#17A65A;">${si}%</div>
+            <div style="font-size:11px;color:#4B5563;font-weight:600;">SÍ</div>
           </div>
           <div style="flex:1;background:#FEF2F2;border-radius:10px;padding:10px 6px;">
             <div style="font-size:22px;font-weight:800;color:#DC2626;">${no}%</div>
-            <div style="font-size:11px;color:#64748B;font-weight:600;">NO</div>
+            <div style="font-size:11px;color:#4B5563;font-weight:600;">NO</div>
           </div>
         </div>
       </div>`;
@@ -505,7 +505,7 @@ function viewDashboard(container) {
             ${AppState.organizaciones.map(o=>`<option value="${o.id}">${o.nombre}</option>`).join('')}
           </select>
           <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosDashboard()">✕ Limpiar</button>
-          <span id="db-filtro-tag" style="display:none;background:#EFF6FF;color:#2563EB;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid #BFDBFE;"></span>
+          <span id="db-filtro-tag" style="display:none;background:#ECF2FA;color:#003B8F;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid #B8CDEB;"></span>
         </div>
       </div>
 
@@ -523,7 +523,7 @@ function viewDashboard(container) {
           <div class="kpi-body">
             <div class="kpi-label">Niños (M)</div>
             <div class="kpi-value" id="kpi-ninos">${ninos.toLocaleString('es')}</div>
-            <div class="kpi-sub" id="kpi-ninos-pct"><span style="background:#DBEAFE;color:#1D4ED8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNinos}%</span></div>
+            <div class="kpi-sub" id="kpi-ninos-pct"><span style="background:#D9E5F5;color:#002F6C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNinos}%</span></div>
           </div>
           <div class="kpi-icon blue">♂</div>
         </div>
@@ -557,14 +557,14 @@ function viewDashboard(container) {
             <div class="kpi-value" id="kpi-trazabilidad">${ms.pctMultiplesPuntos}%</div>
             <div class="kpi-sub">+ de un punto de atención</div>
           </div>
-          <div class="kpi-icon green" style="background:#F0FDF4;color:#16A34A;">↺</div>
+          <div class="kpi-icon green" style="background:#F0FDF4;color:#17A65A;">↺</div>
         </div>
       </div>
 
       <!-- BANNER TRAZABILIDAD -->
       <div id="trazabilidad-banner" style="background:linear-gradient(135deg,#0D1B36 0%,#1e3a8a 100%);border-radius:14px;padding:20px 24px;margin-bottom:20px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;">
         <div>
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#93C5FD;margin-bottom:6px;">Impacto de red — Trazabilidad de trayectorias</div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#8FB0DE;margin-bottom:6px;">Impacto de red — Trazabilidad de trayectorias</div>
           <div id="trazabilidad-banner-texto" style="font-size:15px;font-weight:600;color:#fff;line-height:1.4;">
             <span style="color:#FCD34D;font-weight:800;">${(ms.nnaMultiplesPuntos||2917).toLocaleString('es')} NNA</span> acompañados en más de un punto de atención &nbsp;·&nbsp;
             <span style="color:#86EFAC;font-weight:800;">${(ms.nnaUnicoPunto||1945).toLocaleString('es')} NNA</span> en un solo punto
@@ -580,17 +580,17 @@ function viewDashboard(container) {
         <div style="display:flex;gap:16px;flex-shrink:0;">
           <div style="text-align:center;">
             <div id="trazabilidad-pct-multi" style="font-size:30px;font-weight:800;color:#FCD34D;line-height:1;">${ms.pctMultiplesPuntos||60}%</div>
-            <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Múltiples<br>puntos</div>
+            <div style="font-size:10px;color:#8FB0DE;font-weight:600;margin-top:2px;">Múltiples<br>puntos</div>
           </div>
           <div style="width:1px;background:rgba(255,255,255,.15);"></div>
           <div style="text-align:center;">
             <div style="font-size:30px;font-weight:800;color:#C4B5FD;line-height:1;">${(ms.atencionesCumuladas||7779).toLocaleString('es')}</div>
-            <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Atenciones<br>acum.</div>
+            <div style="font-size:10px;color:#8FB0DE;font-weight:600;margin-top:2px;">Atenciones<br>acum.</div>
           </div>
           <div style="width:1px;background:rgba(255,255,255,.15);"></div>
           <div style="text-align:center;">
             <div style="font-size:30px;font-weight:800;color:#A5F3FC;line-height:1;">${ms.femVsOtras?.fem||100}%</div>
-            <div style="font-size:10px;color:#93C5FD;font-weight:600;margin-top:2px;">Red<br>FEM</div>
+            <div style="font-size:10px;color:#8FB0DE;font-weight:600;margin-top:2px;">Red<br>FEM</div>
           </div>
         </div>
       </div>
@@ -603,7 +603,7 @@ function viewDashboard(container) {
             <div class="card-subtitle">Comparación por período — Corte: Abril 2026</div>
           </div>
           <div style="display:flex;gap:8px;">
-            <button id="btn-mensual" class="btn btn-sm" style="background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;font-weight:700;" onclick="cambiarPeriodoCrecimiento('mensual')">Mensual</button>
+            <button id="btn-mensual" class="btn btn-sm" style="background:#ECF2FA;color:#003B8F;border:1.5px solid #B8CDEB;font-weight:700;" onclick="cambiarPeriodoCrecimiento('mensual')">Mensual</button>
             <button id="btn-semestral" class="btn btn-sm btn-secondary" onclick="cambiarPeriodoCrecimiento('semestral')">Semestral</button>
             <button id="btn-anual" class="btn btn-sm btn-secondary" onclick="cambiarPeriodoCrecimiento('anual')">Anual</button>
           </div>
@@ -611,8 +611,8 @@ function viewDashboard(container) {
         <div style="display:grid;grid-template-columns:1fr 200px;gap:20px;align-items:center;padding:4px 0 8px;">
           <div style="height:200px;"><canvas id="chart-crecimiento"></canvas></div>
           <div id="variacion-card" style="text-align:center;background:#F0FDF4;border-radius:12px;padding:20px 16px;border:1.5px solid #BBF7D0;">
-            <div style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">vs Marzo 2026</div>
-            <div style="font-size:38px;font-weight:800;color:#16A34A;line-height:1.1;margin:6px 0;">+1.4%</div>
+            <div style="font-size:11px;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">vs Marzo 2026</div>
+            <div style="font-size:38px;font-weight:800;color:#17A65A;line-height:1.1;margin:6px 0;">+1.4%</div>
             <div style="font-size:13px;color:#374151;font-weight:600;">4,862 <span style="color:#94A3B8;font-size:11px;">vs</span> 4,796</div>
             <div style="font-size:11px;color:#94A3B8;margin-top:3px;">+66 registros</div>
           </div>
@@ -627,15 +627,15 @@ function viewDashboard(container) {
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Nivel Educativo</div></div>
-          ${ms.nivelEducativo.map(n=>barRow(n.label,n.pct,'#10B981')).join('')}
+          ${ms.nivelEducativo.map(n=>barRow(n.label,n.pct,'#17A65A')).join('')}
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Razones de Migración</div></div>
-          ${ms.razonesTop.map(r=>barRow(r.label,r.pct,'#2563EB')).join('')}
+          ${ms.razonesTop.map(r=>barRow(r.label,r.pct,'#003B8F')).join('')}
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Tipo de Ingresos</div></div>
-          ${ms.tipoIngresos.map(t=>barRow(t.label,t.pct,'#14B8A6')).join('')}
+          ${ms.tipoIngresos.map(t=>barRow(t.label,t.pct,'#1AA6B7')).join('')}
         </div>
       </div>
 
@@ -650,13 +650,13 @@ function viewDashboard(container) {
             <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F1F5F9;">
               <span style="font-size:18px;width:24px;text-align:center;flex-shrink:0;">${s.icono}</span>
               <div style="flex:1;min-width:0;">
-                <div style="font-size:12px;font-weight:600;color:#1A2B4B;margin-bottom:3px;">${s.label}</div>
+                <div style="font-size:12px;font-weight:600;color:#002F6C;margin-bottom:3px;">${s.label}</div>
                 <div style="background:#F1F5F9;border-radius:20px;height:5px;overflow:hidden;">
-                  <div style="background:#2563EB;height:100%;width:${s.pct}%;border-radius:20px;transition:width .4s;"></div>
+                  <div style="background:#003B8F;height:100%;width:${s.pct}%;border-radius:20px;transition:width .4s;"></div>
                 </div>
               </div>
               <div style="text-align:right;flex-shrink:0;min-width:64px;">
-                <div style="font-size:12px;font-weight:700;color:#2563EB;">${s.pct}%</div>
+                <div style="font-size:12px;font-weight:700;color:#003B8F;">${s.pct}%</div>
                 <div style="font-size:10px;color:#94A3B8;">${s.total.toLocaleString('es')}</div>
               </div>
             </div>`).join('')}
@@ -669,17 +669,17 @@ function viewDashboard(container) {
           ${(()=>{
             const TIPO_COLOR = {
               'Operativa':'#6366F1','Salud':'#EF4444','Legal':'#F59E0B',
-              'Protección':'#8B5CF6','Humanitaria':'#14B8A6','Alojamiento':'#3B82F6',
-              'Salud Mental':'#EC4899','Educación':'#10B981','Familia':'#F97316','Laboral':'#0EA5E9'
+              'Protección':'#8B5CF6','Humanitaria':'#1AA6B7','Alojamiento':'#003B8F',
+              'Salud Mental':'#EC4899','Educación':'#17A65A','Familia':'#F97316','Laboral':'#0EA5E9'
             };
             const maxTotal = ms.recomendacionesTop[0]?.total || 1;
             return ms.recomendacionesTop.map(r=>{
-              const color = TIPO_COLOR[r.tipo] || '#64748B';
+              const color = TIPO_COLOR[r.tipo] || '#4B5563';
               const pct   = Math.round(r.total / maxTotal * 100);
               return `<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid #F1F5F9;">
                 <span style="display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;color:#fff;background:${color};flex-shrink:0;margin-top:2px;">${r.tipo}</span>
                 <div style="flex:1;min-width:0;">
-                  <div style="font-size:12px;font-weight:600;color:#1A2B4B;margin-bottom:3px;line-height:1.3;">${r.label}</div>
+                  <div style="font-size:12px;font-weight:600;color:#002F6C;margin-bottom:3px;line-height:1.3;">${r.label}</div>
                   <div style="background:#F1F5F9;border-radius:20px;height:5px;overflow:hidden;">
                     <div style="background:${color};height:100%;width:${pct}%;border-radius:20px;transition:width .4s;"></div>
                   </div>
@@ -709,16 +709,16 @@ function viewDashboard(container) {
           ${ms.paisDestino.map(p=>`<div style="padding:10px 0;border-bottom:1px solid #F1F5F9;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
               <span style="font-size:13px;font-weight:600;">${p.bandera} ${p.label}</span>
-              <span style="font-size:13px;font-weight:800;color:#1A2B4B;">${(p.nna||0).toLocaleString('es')} NNA</span>
+              <span style="font-size:13px;font-weight:800;color:#002F6C;">${(p.nna||0).toLocaleString('es')} NNA</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
               <div style="background:#F1F5F9;border-radius:20px;height:7px;flex:1;overflow:hidden;">
-                <div style="background:#2563EB;height:100%;width:${p.pct}%;border-radius:20px;"></div>
+                <div style="background:#003B8F;height:100%;width:${p.pct}%;border-radius:20px;"></div>
               </div>
-              <span style="font-size:11px;font-weight:700;color:#2563EB;min-width:32px;text-align:right;">${p.pct}%</span>
+              <span style="font-size:11px;font-weight:700;color:#003B8F;min-width:32px;text-align:right;">${p.pct}%</span>
             </div>
           </div>`).join('')}
-          <div style="padding:8px 0;font-size:11px;color:#64748B;text-align:right;">Total: 4.862 NNA únicos</div>
+          <div style="padding:8px 0;font-size:11px;color:#4B5563;text-align:right;">Total: 4.862 NNA únicos</div>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">📋 Atenciones Acumuladas por País</div></div>
@@ -734,7 +734,7 @@ function viewDashboard(container) {
               <span style="font-size:11px;font-weight:700;color:#7C3AED;min-width:32px;text-align:right;">${p.pct}%</span>
             </div>
           </div>`).join('')}
-          <div style="padding:8px 0;font-size:11px;color:#64748B;text-align:right;">Total: 7.779 atenciones acumuladas</div>
+          <div style="padding:8px 0;font-size:11px;color:#4B5563;text-align:right;">Total: 7.779 atenciones acumuladas</div>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Plataformas Digitales</div></div>
@@ -748,9 +748,9 @@ function viewDashboard(container) {
           ${AppState.organizaciones.filter(o=>o.esFEM && (o.paisId==='VE'||o.paisId==='CO')).sort((a,b)=>b.recomendaciones-a.recomendaciones).slice(0,5).map((o,i)=>{
             const p=Helpers.paisById(o.paisId);
             return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F1F5F9;">
-              <div style="width:20px;height:20px;background:#EFF6FF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#2563EB;flex-shrink:0;">${i+1}</div>
+              <div style="width:20px;height:20px;background:#ECF2FA;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#003B8F;flex-shrink:0;">${i+1}</div>
               <div style="flex:1;min-width:0;">
-                <div style="font-size:12px;font-weight:600;color:#1A2B4B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.nombre}</div>
+                <div style="font-size:12px;font-weight:600;color:#002F6C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.nombre}</div>
                 <div style="font-size:11px;color:#94A3B8;">${p?.bandera||''} ${p?.label||''} · FEM</div>
               </div>
               <div style="text-align:right;flex-shrink:0;">
@@ -775,10 +775,10 @@ function viewDashboard(container) {
           datasets: [{
             label: 'Registros',
             data: hist.map(h=>h.total),
-            borderColor: '#2563EB', backgroundColor: 'rgba(37,99,235,0.08)',
+            borderColor: '#003B8F', backgroundColor: 'rgba(0,59,143,0.08)',
             fill: true, tension: 0.4,
-            pointBackgroundColor: hist.map((_,i)=>i===hist.length-1?'#2563EB':'#fff'),
-            pointBorderColor: '#2563EB', pointRadius: hist.map((_,i)=>i===hist.length-1?7:4), pointBorderWidth: 2,
+            pointBackgroundColor: hist.map((_,i)=>i===hist.length-1?'#003B8F':'#fff'),
+            pointBorderColor: '#003B8F', pointRadius: hist.map((_,i)=>i===hist.length-1?7:4), pointBorderWidth: 2,
           }]
         },
         options: {
@@ -801,7 +801,7 @@ function cambiarPeriodoCrecimiento(periodo) {
     const btn = document.getElementById('btn-'+p);
     if (!btn) return;
     if (p === periodo) {
-      btn.style.cssText = 'background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;font-weight:700;';
+      btn.style.cssText = 'background:#ECF2FA;color:#003B8F;border:1.5px solid #B8CDEB;font-weight:700;';
       btn.className = 'btn btn-sm';
     } else {
       btn.style.cssText = '';
@@ -812,8 +812,8 @@ function cambiarPeriodoCrecimiento(periodo) {
   if (vc && comp) {
     const diff = ms.totalRegistros - comp.valor;
     vc.innerHTML = `
-      <div style="font-size:11px;color:#64748B;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">vs ${comp.label}</div>
-      <div style="font-size:38px;font-weight:800;color:#16A34A;line-height:1.1;margin:6px 0;">+${comp.pct}%</div>
+      <div style="font-size:11px;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">vs ${comp.label}</div>
+      <div style="font-size:38px;font-weight:800;color:#17A65A;line-height:1.1;margin:6px 0;">+${comp.pct}%</div>
       <div style="font-size:13px;color:#374151;font-weight:600;">${ms.totalRegistros.toLocaleString('es')} <span style="color:#94A3B8;font-size:11px;">vs</span> ${comp.valor.toLocaleString('es')}</div>
       <div style="font-size:11px;color:#94A3B8;margin-top:3px;">+${diff.toLocaleString('es')} registros</div>`;
   }
@@ -915,7 +915,7 @@ function actualizarDashboard() {
 
   // Actualizar badges de porcentaje
   const badgeNi = document.getElementById('kpi-ninos-pct');
-  if (badgeNi) badgeNi.innerHTML = `<span style="background:#DBEAFE;color:#1D4ED8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNi}%</span>`;
+  if (badgeNi) badgeNi.innerHTML = `<span style="background:#D9E5F5;color:#002F6C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNi}%</span>`;
   const badgeNa = document.getElementById('kpi-ninas-pct');
   if (badgeNa) badgeNa.innerHTML = `<span style="background:#FCE7F3;color:#BE185D;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNa}%</span>`;
 
@@ -1001,7 +1001,7 @@ function viewMigranteListado(container, params = {}) {
           <p class="page-subtitle" id="listado-count">Cargando...</p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-secondary btn-sm" onclick="showModal({titulo:'Agrupación',body:'<p>Agrupa los registros por País, Ciudad u Organización para análisis agrupado.</p><p style=\\'margin-top:8px;font-size:12px;color:#64748B;\\'>Esta función estará disponible en la versión final.</p>',acciones:['<button class=\\'btn btn-secondary\\' onclick=\\'closeModal()\\'>Cerrar</button>']})">≡ Agrupación</button>
+          <button class="btn btn-secondary btn-sm" onclick="showModal({titulo:'Agrupación',body:'<p>Agrupa los registros por País, Ciudad u Organización para análisis agrupado.</p><p style=\\'margin-top:8px;font-size:12px;color:#4B5563;\\'>Esta función estará disponible en la versión final.</p>',acciones:['<button class=\\'btn btn-secondary\\' onclick=\\'closeModal()\\'>Cerrar</button>']})">≡ Agrupación</button>
           <button class="btn btn-secondary btn-sm" onclick="showToast('Exportando listado...','success')">⬇ Exportar</button>
           <button class="btn btn-secondary btn-sm" onclick="showModal({titulo:'Tipo de Consulta',body:'<p><strong>Básica:</strong> Campos principales del registro.</p><p><strong>Detallada:</strong> Incluye ruta completa y servicios recibidos.</p><p><strong>Estadística:</strong> Resumen agrupado por indicadores.</p>',acciones:['<button class=\\'btn btn-primary\\' onclick=\\'closeModal()\\'>Aplicar</button>']})">🔍 Tipo Consulta</button>
           <button class="btn btn-secondary btn-sm" onclick="showModal({titulo:'Opciones avanzadas',body:'<p>Columnas visibles, densidad, paginación y otras opciones de visualización.</p>',acciones:['<button class=\\'btn btn-secondary\\' onclick=\\'closeModal()\\'>Cerrar</button>']})">⚙ Opciones</button>
@@ -1196,12 +1196,12 @@ function renderListado() {
         <td style="font-size:12px;">${destPais?.bandera || ''} ${destPais?.label || '—'}</td>
         <td>${estadoBadge(m.estado)}</td>
         <td><span class="badge ${Helpers.vulnerabilidadBadge(m.vulnerabilidad)}">${Helpers.vulnerabilidadLabel(m.vulnerabilidad)}</span></td>
-        <td style="font-size:12px;color:#64748B;">${fechaReg}</td>
+        <td style="font-size:12px;color:#4B5563;">${fechaReg}</td>
         <td onclick="event.stopPropagation()">
           <div style="display:flex;gap:4px;justify-content:flex-end;">
             <button class="btn btn-sm btn-secondary" onclick="navigate('/migrante/detalle/${m.id}')">Ver</button>
             <button class="btn btn-sm" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;" title="Ver ruta en el mapa" onclick="verRutaNNA('${m.id}')">🗺 Ruta</button>
-            <button class="btn btn-sm" style="background:#EFF6FF;color:#2563EB;" onclick="navigate('/migrante/nuevo',{editId:'${m.id}'})">Editar</button>
+            <button class="btn btn-sm" style="background:#ECF2FA;color:#003B8F;" onclick="navigate('/migrante/nuevo',{editId:'${m.id}'})">Editar</button>
           </div>
         </td>
       </tr>`;
@@ -1326,7 +1326,7 @@ function viewMigranteDetalle(container, params = {}) {
 
     // Helper para badge sí/no/null
     const boolBadge = val => val === true || val === 'si'
-      ? `<span class="badge" style="background:#DCFCE7;color:#16A34A;">Sí</span>`
+      ? `<span class="badge" style="background:#DCFCE7;color:#17A65A;">Sí</span>`
       : val === false || val === 'no'
       ? `<span class="badge" style="background:#FEE2E2;color:#DC2626;">No</span>`
       : `<span class="text-muted" style="font-size:12px;">—</span>`;
@@ -1400,7 +1400,7 @@ function viewMigranteDetalle(container, params = {}) {
               ${datoFicha('🌍 País entrevista', `${paisEntrevista?.bandera||''} ${paisEntrevista?.label||'—'}`)}
               ${datoFicha('🏙 Ciudad', ciudadEntrevista?.label || '—')}
               ${datoFicha('🏘 Municipio', municipioEntrev)}
-              ${datoFicha('✅ Consentimiento', consentimiento === true || consentimiento === 'si' ? '<span class="badge" style="background:#DCFCE7;color:#16A34A;">Otorgado</span>' : consentimiento === false || consentimiento === 'no' ? '<span class="badge" style="background:#FEE2E2;color:#DC2626;">No otorgado</span>' : '—')}
+              ${datoFicha('✅ Consentimiento', consentimiento === true || consentimiento === 'si' ? '<span class="badge" style="background:#DCFCE7;color:#17A65A;">Otorgado</span>' : consentimiento === false || consentimiento === 'no' ? '<span class="badge" style="background:#FEE2E2;color:#DC2626;">No otorgado</span>' : '—')}
             </div>
           </div>
 
@@ -1852,7 +1852,7 @@ function viewMigranteNuevo(container, params = {}) {
               </tbody>
             </table>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="agregarFilaGrupo()" style="color:#2563EB;">
+          <button class="btn btn-ghost btn-sm" onclick="agregarFilaGrupo()" style="color:#003B8F;">
             + Agregar nuevo
           </button>
         </div>
@@ -2451,7 +2451,7 @@ function showOrgModal(orgId = null) {
     <div id="${modalId}" style="position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);">
       <div style="background:#fff;border-radius:16px;padding:32px;width:100%;max-width:560px;box-shadow:0 24px 80px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-          <h3 style="font-size:16px;font-weight:800;color:#1A2B4B;margin:0;">${isEdit?'Editar':'Nueva'} Organización</h3>
+          <h3 style="font-size:16px;font-weight:800;color:#002F6C;margin:0;">${isEdit?'Editar':'Nueva'} Organización</h3>
           <button onclick="document.getElementById('${modalId}').remove()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#94A3B8;">×</button>
         </div>
         ${row([
@@ -2473,7 +2473,7 @@ function showOrgModal(orgId = null) {
         <div style="margin-bottom:14px;">${field('descripcion', 'Descripción', `<textarea id="${modalId}-descripcion" rows="2" style="${fieldStyle}height:auto;">${org?.descripcion||''}</textarea>`)}</div>
         <div style="display:flex;gap:10px;margin-top:24px;">
           <button onclick="document.getElementById('${modalId}').remove()" style="flex:1;padding:11px;border:1.5px solid #E2E8F0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13px;color:#475569;">Cancelar</button>
-          <button id="${modalId}-save" onclick="saveOrgModal('${modalId}','${orgId||''}')" style="flex:2;padding:11px;border:none;border-radius:8px;background:#2563EB;color:#fff;cursor:pointer;font-weight:700;font-size:13px;">${isEdit?'Guardar cambios':'Crear organización'}</button>
+          <button id="${modalId}-save" onclick="saveOrgModal('${modalId}','${orgId||''}')" style="flex:2;padding:11px;border:none;border-radius:8px;background:#003B8F;color:#fff;cursor:pointer;font-weight:700;font-size:13px;">${isEdit?'Guardar cambios':'Crear organización'}</button>
         </div>
       </div>
     </div>`);
@@ -2567,7 +2567,7 @@ function viewOrgsRecomendaciones(container) {
           ${orgs.map((org,i) => {
             const pais = Helpers.paisById(org.paisId);
             const pct = Math.round((org.recomendaciones/max)*100);
-            const colors = ['#E8612A','#3B82F6','#10B981','#8B5CF6','#F59E0B'];
+            const colors = ['#F47C00','#003B8F','#17A65A','#8B5CF6','#F59E0B'];
             const color = colors[i % colors.length];
             return `
               <div style="display:flex;align-items:center;gap:16px;">
@@ -2641,7 +2641,7 @@ function viewOrgsCiudades(container) {
       data: {
         labels: Object.keys(porPais),
         datasets: [{ data: Object.values(porPais),
-          backgroundColor:['#E8612A','#3B82F6','#10B981','#8B5CF6','#F59E0B','#EF4444'],
+          backgroundColor:['#F47C00','#003B8F','#17A65A','#8B5CF6','#F59E0B','#EF4444'],
           borderWidth:3, borderColor:'#fff' }]
       },
       options: { responsive:true, maintainAspectRatio:false,
@@ -2714,7 +2714,7 @@ function viewOrigenDetallado(container) {
         datasets: [{
           label: 'Migrantes',
           data: data.map(([,v])=>v),
-          backgroundColor: data.map((_,i)=>['#E8612A','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#14B8A6'][i%7]),
+          backgroundColor: data.map((_,i)=>['#F47C00','#003B8F','#17A65A','#F59E0B','#8B5CF6','#EF4444','#1AA6B7'][i%7]),
           borderRadius: 8, borderSkipped: false,
         }]
       },
@@ -2797,7 +2797,7 @@ function viewEstadisticas(container) {
                       ${['en_transito','atendido','derivado','ubicado'].map(est => {
                         const c = migs.filter(m=>m.estado===est).length;
                         const pct = Math.round((c/migs.length)*100);
-                        const col = {en_transito:'#F59E0B',atendido:'#3B82F6',derivado:'#8B5CF6',ubicado:'#10B981'}[est];
+                        const col = {en_transito:'#F59E0B',atendido:'#003B8F',derivado:'#8B5CF6',ubicado:'#17A65A'}[est];
                         return pct>0?`<div style="width:${pct}%;background:${col};border-radius:2px;"></div>`:'';
                       }).join('')}
                     </div>
@@ -2863,7 +2863,7 @@ function viewEstadisticas(container) {
       type:'doughnut',
       data:{ labels:gData.map(x=>x.label),
         datasets:[{ data:gData.map(x=>x.value),
-          backgroundColor:['#E8612A','#3B82F6','#8B5CF6','#6B7280'],
+          backgroundColor:['#F47C00','#003B8F','#8B5CF6','#6B7280'],
           borderWidth:3,borderColor:'#fff' }]},
       options:{ responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},padding:12,usePointStyle:true}}},cutout:'60%' }
     });
@@ -2876,7 +2876,7 @@ function viewEstadisticas(container) {
         const vals = rangos.map(([,mn,mx]) => AppState.migrantes.filter(m=>{const e=Helpers.edad(m.fechaNacimiento);return e>=mn&&e<mx;}).length);
         new Chart(el,{
           type:'bar',
-          data:{labels:rangos.map(r=>r[0]),datasets:[{label:'Migrantes',data:vals,backgroundColor:'#3B82F6',borderRadius:6,borderSkipped:false}]},
+          data:{labels:rangos.map(r=>r[0]),datasets:[{label:'Migrantes',data:vals,backgroundColor:'#003B8F',borderRadius:6,borderSkipped:false}]},
           options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#F1F5F9'},ticks:{stepSize:1}}}}
         });
       }
@@ -2889,7 +2889,7 @@ function viewEstadisticas(container) {
           type:'bar',
           data:{
             labels:sv.map(([sid])=>{ const x=AppState.catalogos.tiposServicio.find(t=>t.id===sid); return x?`${x.icono} ${x.label}`:sid;}),
-            datasets:[{data:sv.map(([,v])=>v),backgroundColor:['#E8612A','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#14B8A6','#6B7280'],borderRadius:6,borderSkipped:false}]
+            datasets:[{data:sv.map(([,v])=>v),backgroundColor:['#F47C00','#003B8F','#17A65A','#F59E0B','#8B5CF6','#EF4444','#1AA6B7','#6B7280'],borderRadius:6,borderSkipped:false}]
           },
           options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#F1F5F9'},ticks:{stepSize:1}}}}
         });
@@ -2902,7 +2902,7 @@ function viewEstadisticas(container) {
         })).filter(x=>x.value>0);
         new Chart(elIng,{
           type:'doughnut',
-          data:{labels:ingr.map(x=>x.label),datasets:[{data:ingr.map(x=>x.value),backgroundColor:['#E8612A','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#14B8A6'],borderWidth:3,borderColor:'#fff'}]},
+          data:{labels:ingr.map(x=>x.label),datasets:[{data:ingr.map(x=>x.value),backgroundColor:['#F47C00','#003B8F','#17A65A','#F59E0B','#8B5CF6','#EF4444','#1AA6B7'],borderWidth:3,borderColor:'#fff'}]},
           options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},padding:10,usePointStyle:true}}},cutout:'55%'}
         });
       }
@@ -2984,35 +2984,35 @@ function viewMapaRutas(container) {
         <p class="page-subtitle">Ruta Venezuela–Colombia–Centroamérica–México–USA · ${totalReal.toLocaleString('es')} NNA registrados</p></div>
         <div class="page-actions">
           <button class="btn btn-secondary btn-sm" onclick="navigate('/migrantes/mapa')" title="Ver puntos de migrantes">📍 Ver migrantes</button>
-          <button class="btn btn-secondary btn-sm" id="btn-vista-paises" onclick="toggleMapaVista('paises')" style="background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;font-weight:700;">Vista países</button>
+          <button class="btn btn-secondary btn-sm" id="btn-vista-paises" onclick="toggleMapaVista('paises')" style="background:#ECF2FA;color:#003B8F;border:1.5px solid #B8CDEB;font-weight:700;">Vista países</button>
           <button class="btn btn-secondary btn-sm" id="btn-vista-colombia" onclick="toggleMapaVista('colombia')">Detalle Colombia</button>
         </div>
       </div>
 
       <!-- STAT BAR -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;">
-        <div class="card card-sm" style="text-align:center;border-left:3px solid #E8612A;">
-          <div style="font-size:22px;font-weight:800;color:#1A2B4B;">${cr.totalPorColombia.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;font-weight:600;">NNA por Colombia</div>
+        <div class="card card-sm" style="text-align:center;border-left:3px solid #F47C00;">
+          <div style="font-size:22px;font-weight:800;color:#002F6C;">${cr.totalPorColombia.toLocaleString('es')}</div>
+          <div style="font-size:11px;color:#4B5563;font-weight:600;">NNA por Colombia</div>
         </div>
-        <div class="card card-sm" style="text-align:center;border-left:3px solid #3B82F6;">
-          <div style="font-size:22px;font-weight:800;color:#1A2B4B;">60%</div>
-          <div style="font-size:11px;color:#64748B;font-weight:600;">Entrada Cúcuta</div>
+        <div class="card card-sm" style="text-align:center;border-left:3px solid #003B8F;">
+          <div style="font-size:22px;font-weight:800;color:#002F6C;">60%</div>
+          <div style="font-size:11px;color:#4B5563;font-weight:600;">Entrada Cúcuta</div>
           <div style="font-size:10px;color:#94A3B8;">${cr.entradaCucuta.total.toLocaleString('es')} NNA</div>
         </div>
         <div class="card card-sm" style="text-align:center;border-left:3px solid #8B5CF6;">
-          <div style="font-size:22px;font-weight:800;color:#1A2B4B;">40%</div>
-          <div style="font-size:11px;color:#64748B;font-weight:600;">Entrada Riohacha</div>
+          <div style="font-size:22px;font-weight:800;color:#002F6C;">40%</div>
+          <div style="font-size:11px;color:#4B5563;font-weight:600;">Entrada Riohacha</div>
           <div style="font-size:10px;color:#94A3B8;">${cr.entradaRiohacha.total.toLocaleString('es')} NNA</div>
         </div>
-        <div class="card card-sm" style="text-align:center;border-left:3px solid #10B981;">
-          <div style="font-size:22px;font-weight:800;color:#1A2B4B;">70%</div>
-          <div style="font-size:11px;color:#64748B;font-weight:600;">Ruta interior</div>
+        <div class="card card-sm" style="text-align:center;border-left:3px solid #17A65A;">
+          <div style="font-size:22px;font-weight:800;color:#002F6C;">70%</div>
+          <div style="font-size:11px;color:#4B5563;font-weight:600;">Ruta interior</div>
           <div style="font-size:10px;color:#94A3B8;">Bogotá·Medellín·Cali</div>
         </div>
         <div class="card card-sm" style="text-align:center;border-left:3px solid #F59E0B;">
-          <div style="font-size:22px;font-weight:800;color:#1A2B4B;">30%</div>
-          <div style="font-size:11px;color:#64748B;font-weight:600;">Ruta costera</div>
+          <div style="font-size:22px;font-weight:800;color:#002F6C;">30%</div>
+          <div style="font-size:11px;color:#4B5563;font-weight:600;">Ruta costera</div>
           <div style="font-size:10px;color:#94A3B8;">Barranquilla·Cartagena·S.Marta</div>
         </div>
       </div>
@@ -3026,17 +3026,17 @@ function viewMapaRutas(container) {
         <div class="card-title" style="margin-bottom:12px;">Distribución en Colombia</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div>
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748B;letter-spacing:.4px;margin-bottom:8px;">Ruta Interior (70% — ${cr.rutaInterior.total.toLocaleString('es')} NNA)</div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#4B5563;letter-spacing:.4px;margin-bottom:8px;">Ruta Interior (70% — ${cr.rutaInterior.total.toLocaleString('es')} NNA)</div>
             ${cr.rutaInterior.ciudades.map(c=>`
               <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;">
-                <div style="width:10px;height:10px;border-radius:50%;background:#10B981;flex-shrink:0;"></div>
+                <div style="width:10px;height:10px;border-radius:50%;background:#17A65A;flex-shrink:0;"></div>
                 <span style="font-size:13px;font-weight:500;flex:1;">${c.label}</span>
-                <span style="font-size:12px;font-weight:700;color:#10B981;">${c.pct}%</span>
+                <span style="font-size:12px;font-weight:700;color:#17A65A;">${c.pct}%</span>
                 <span style="font-size:11px;color:#94A3B8;">${c.total.toLocaleString('es')} NNA</span>
               </div>`).join('')}
           </div>
           <div>
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748B;letter-spacing:.4px;margin-bottom:8px;">Ruta Costera (30% — ${cr.rutaCosta.total.toLocaleString('es')} NNA)</div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#4B5563;letter-spacing:.4px;margin-bottom:8px;">Ruta Costera (30% — ${cr.rutaCosta.total.toLocaleString('es')} NNA)</div>
             ${cr.rutaCosta.ciudades.map(c=>`
               <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid #F1F5F9;">
                 <div style="width:10px;height:10px;border-radius:50%;background:#F59E0B;flex-shrink:0;"></div>
@@ -3069,7 +3069,7 @@ function viewMapaRutas(container) {
       const rutaCoords = ['VE','CO','PA','CR','MX','US']
         .map(id => AppState.catalogos.paises.find(p=>p.id===id))
         .filter(Boolean).map(p => p.coords);
-      L.polyline(rutaCoords, { color:'#E8612A', weight:3.5, opacity:0.75, dashArray:'8,5' })
+      L.polyline(rutaCoords, { color:'#F47C00', weight:3.5, opacity:0.75, dashArray:'8,5' })
         .addTo(window._layerPaises);
 
       // Marcadores de países — con totales reales
@@ -3083,17 +3083,17 @@ function viewMapaRutas(container) {
         const sz = migsEnPais > 1000 ? 48 : migsEnPais > 500 ? 42 : 36;
         const icon = L.divIcon({
           className: '',
-          html: '<div style="background:#1A2B4B;color:white;border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;'
+          html: '<div style="background:#002F6C;color:white;border-radius:50%;width:' + sz + 'px;height:' + sz + 'px;'
             + 'display:flex;align-items:center;justify-content:center;font-size:' + Math.round(sz*0.46) + 'px;'
-            + 'border:3px solid #E8612A;box-shadow:0 2px 8px rgba(0,0,0,0.3);">' + p.bandera + '</div>',
+            + 'border:3px solid #F47C00;box-shadow:0 2px 8px rgba(0,0,0,0.3);">' + p.bandera + '</div>',
           iconSize: [sz, sz], iconAnchor: [sz/2, sz/2]
         });
         L.marker(p.coords, { icon })
           .addTo(window._layerPaises)
           .bindPopup('<div style="font-family:Inter,sans-serif;min-width:180px;">'
             + '<div style="font-weight:700;font-size:14px;margin-bottom:6px;">' + p.bandera + ' ' + p.label + '</div>'
-            + '<div style="font-size:20px;font-weight:800;color:#1A2B4B;margin-bottom:4px;">' + migsEnPais.toLocaleString('es') + ' NNA</div>'
-            + '<div style="font-size:11px;color:#64748B;">' + orgsEnPais + ' organización' + (orgsEnPais!==1?'es':'') + ' activa' + (orgsEnPais!==1?'s':'') + '</div>'
+            + '<div style="font-size:20px;font-weight:800;color:#002F6C;margin-bottom:4px;">' + migsEnPais.toLocaleString('es') + ' NNA</div>'
+            + '<div style="font-size:11px;color:#4B5563;">' + orgsEnPais + ' organización' + (orgsEnPais!==1?'es':'') + ' activa' + (orgsEnPais!==1?'s':'') + '</div>'
             + '</div>', { closeButton: false });
       });
 
@@ -3101,11 +3101,11 @@ function viewMapaRutas(container) {
 
       // Marcadores de ciudad con círculos proporcionales
       const ciudadesCO = [
-        { id:'CUC', label:'Cúcuta',       total: cr.entradaCucuta.total,  pct: 60, color:'#3B82F6', tipo:'Entrada (60%)' },
+        { id:'CUC', label:'Cúcuta',       total: cr.entradaCucuta.total,  pct: 60, color:'#003B8F', tipo:'Entrada (60%)' },
         { id:'RIO', label:'Riohacha',     total: cr.entradaRiohacha.total,pct: 40, color:'#8B5CF6', tipo:'Entrada (40%)' },
-        { id:'BOG', label:'Bogotá',       total: cr.rutaInterior.ciudades[0].total, pct: cr.rutaInterior.ciudades[0].pct, color:'#10B981', tipo:'Interior 50%' },
-        { id:'MED', label:'Medellín',     total: cr.rutaInterior.ciudades[1].total, pct: cr.rutaInterior.ciudades[1].pct, color:'#10B981', tipo:'Interior 30%' },
-        { id:'CAL', label:'Cali',         total: cr.rutaInterior.ciudades[2].total, pct: cr.rutaInterior.ciudades[2].pct, color:'#10B981', tipo:'Interior 20%' },
+        { id:'BOG', label:'Bogotá',       total: cr.rutaInterior.ciudades[0].total, pct: cr.rutaInterior.ciudades[0].pct, color:'#17A65A', tipo:'Interior 50%' },
+        { id:'MED', label:'Medellín',     total: cr.rutaInterior.ciudades[1].total, pct: cr.rutaInterior.ciudades[1].pct, color:'#17A65A', tipo:'Interior 30%' },
+        { id:'CAL', label:'Cali',         total: cr.rutaInterior.ciudades[2].total, pct: cr.rutaInterior.ciudades[2].pct, color:'#17A65A', tipo:'Interior 20%' },
         { id:'BAR', label:'Barranquilla', total: cr.rutaCosta.ciudades[0].total,    pct: cr.rutaCosta.ciudades[0].pct,    color:'#F59E0B', tipo:'Costa 40%' },
         { id:'CTG', label:'Cartagena',    total: cr.rutaCosta.ciudades[1].total,    pct: cr.rutaCosta.ciudades[1].pct,    color:'#F59E0B', tipo:'Costa 35%' },
         { id:'SMA', label:'Santa Marta',  total: cr.rutaCosta.ciudades[2].total,    pct: cr.rutaCosta.ciudades[2].pct,    color:'#F59E0B', tipo:'Costa 25%' },
@@ -3142,7 +3142,7 @@ function viewMapaRutas(container) {
         AppState.catalogos.ciudades.find(c=>c.id==='MED')?.coords,
         AppState.catalogos.ciudades.find(c=>c.id==='CAL')?.coords,
       ].filter(Boolean);
-      L.polyline(rutaInterior, { color:'#10B981', weight:2.5, opacity:0.7, dashArray:'6,4' })
+      L.polyline(rutaInterior, { color:'#17A65A', weight:2.5, opacity:0.7, dashArray:'6,4' })
         .addTo(window._layerColombia);
 
       // Línea: ruta costera CO
@@ -3163,8 +3163,8 @@ window.toggleMapaVista = function(vista) {
   const map = window._mapRutasInstance;
   if (!map) return;
   window._mapaVistaActual = vista;
-  document.getElementById('btn-vista-paises')?.setAttribute('style', vista==='paises' ? 'background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;font-weight:700;' : '');
-  document.getElementById('btn-vista-colombia')?.setAttribute('style', vista==='colombia' ? 'background:#EFF6FF;color:#2563EB;border:1.5px solid #BFDBFE;font-weight:700;' : '');
+  document.getElementById('btn-vista-paises')?.setAttribute('style', vista==='paises' ? 'background:#ECF2FA;color:#003B8F;border:1.5px solid #B8CDEB;font-weight:700;' : '');
+  document.getElementById('btn-vista-colombia')?.setAttribute('style', vista==='colombia' ? 'background:#ECF2FA;color:#003B8F;border:1.5px solid #B8CDEB;font-weight:700;' : '');
   if (vista === 'colombia') {
     if (window._layerPaises) map.removeLayer(window._layerPaises);
     if (window._layerColombia) window._layerColombia.addTo(map);
@@ -3200,25 +3200,25 @@ function viewMapaMigrantes(container) {
 
       <!-- KPI Cards -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px;">
-        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #1A2B4B;">
-          <div style="font-size:22px;font-weight:800;color:#1A2B4B;">${kpiTotal.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">NNA Registrados</div>
+        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #002F6C;">
+          <div style="font-size:22px;font-weight:800;color:#002F6C;">${kpiTotal.toLocaleString('es')}</div>
+          <div style="font-size:11px;color:#4B5563;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">NNA Registrados</div>
         </div>
-        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #2563EB;">
-          <div style="font-size:22px;font-weight:800;color:#2563EB;">${kpiAtencion.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Atenciones Acum.</div>
+        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #003B8F;">
+          <div style="font-size:22px;font-weight:800;color:#003B8F;">${kpiAtencion.toLocaleString('es')}</div>
+          <div style="font-size:11px;color:#4B5563;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Atenciones Acum.</div>
         </div>
         <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #F59E0B;">
           <div style="font-size:22px;font-weight:800;color:#D97706;">${kpiMulti.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Múltiples puntos</div>
+          <div style="font-size:11px;color:#4B5563;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Múltiples puntos</div>
         </div>
-        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #64748B;">
+        <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #4B5563;">
           <div style="font-size:22px;font-weight:800;color:#475569;">${kpiUnico.toLocaleString('es')}</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Un solo punto</div>
+          <div style="font-size:11px;color:#4B5563;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Un solo punto</div>
         </div>
         <div class="card" style="padding:14px 16px;text-align:center;border-top:3px solid #7C3AED;">
           <div style="font-size:22px;font-weight:800;color:#7C3AED;">${femPct}%</div>
-          <div style="font-size:11px;color:#64748B;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Atendidos por FEM</div>
+          <div style="font-size:11px;color:#4B5563;margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;">Atendidos por FEM</div>
         </div>
       </div>
 
@@ -3242,21 +3242,21 @@ function viewMapaMigrantes(container) {
         <div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Filtros de red</div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
           <div style="flex:2;min-width:200px;">
-            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">📍 Filtrar por ciudad FEM</div>
+            <div style="font-size:11px;font-weight:600;color:#4B5563;margin-bottom:5px;">📍 Filtrar por ciudad FEM</div>
             <select class="form-control" id="ruta-filtro-ciudad" onchange="renderRutasMapa()" style="font-size:13px;">
               <option value="">— Todas las ciudades —</option>
               ${ciudadesData.map(c=>`<option value="${c.ciudadId}">${c.label} — ${(c.nnaUnicos||0).toLocaleString('es')} NNA</option>`).join('')}
             </select>
           </div>
           <div style="flex:1;min-width:160px;">
-            <div style="font-size:11px;font-weight:600;color:#64748B;margin-bottom:5px;">🗺️ Modo de vista</div>
+            <div style="font-size:11px;font-weight:600;color:#4B5563;margin-bottom:5px;">🗺️ Modo de vista</div>
             <select class="form-control" id="ruta-modo" onchange="renderRutasMapa()" style="font-size:13px;">
               <option value="rutas">Rutas + Ciudades</option>
               <option value="puntos">Solo puntos actuales</option>
             </select>
           </div>
         </div>
-        <div id="ruta-conteo-badge" style="margin-top:10px;font-size:12px;color:#64748B;min-height:18px;"></div>
+        <div id="ruta-conteo-badge" style="margin-top:10px;font-size:12px;color:#4B5563;min-height:18px;"></div>
       </div>
 
       <!-- Mapa -->
@@ -3290,13 +3290,13 @@ function viewMapaMigrantes(container) {
                 <tr>
                   <td><strong>${c.label}</strong></td>
                   <td><span class="badge badge-gray">${c.paisLabel||''}</span></td>
-                  <td style="text-align:right;font-weight:700;color:#1A2B4B;">${(c.nnaUnicos||0).toLocaleString('es')}</td>
-                  <td style="text-align:right;color:#2563EB;font-weight:600;">${(c.atenciones||0).toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:700;color:#002F6C;">${(c.nnaUnicos||0).toLocaleString('es')}</td>
+                  <td style="text-align:right;color:#003B8F;font-weight:600;">${(c.atenciones||0).toLocaleString('es')}</td>
                   <td style="text-align:right;color:#7C3AED;">${(c.multiPunto||0).toLocaleString('es')}</td>
                   <td style="text-align:right;font-weight:700;">${c.pct||0}%</td>
                   <td>
                     <div style="background:#F1F5F9;border-radius:20px;height:6px;overflow:hidden;">
-                      <div style="background:#2563EB;height:100%;width:${(c.pct||0) * 5}%;border-radius:20px;max-width:100%;"></div>
+                      <div style="background:#003B8F;height:100%;width:${(c.pct||0) * 5}%;border-radius:20px;max-width:100%;"></div>
                     </div>
                   </td>
                 </tr>
@@ -3307,8 +3307,8 @@ function viewMapaMigrantes(container) {
                 const totMult = ciudadesData.reduce((s,c) => s + (c.multiPunto||0), 0) || kpiMulti;
                 return `<tr style="background:#F8FAFC;">
                   <td colspan="2"><strong>TOTAL RED FEM</strong></td>
-                  <td style="text-align:right;font-weight:800;color:#1A2B4B;">${totNNA.toLocaleString('es')}</td>
-                  <td style="text-align:right;font-weight:800;color:#2563EB;">${totAt.toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:800;color:#002F6C;">${totNNA.toLocaleString('es')}</td>
+                  <td style="text-align:right;font-weight:800;color:#003B8F;">${totAt.toLocaleString('es')}</td>
                   <td style="text-align:right;font-weight:800;color:#7C3AED;">${totMult.toLocaleString('es')}</td>
                   <td style="text-align:right;font-weight:800;">100%</td>
                   <td></td>
@@ -3317,9 +3317,9 @@ function viewMapaMigrantes(container) {
             </tbody>
           </table>
         </div>
-        <div style="padding:12px 16px;background:#EFF6FF;border-top:1px solid #DBEAFE;display:flex;gap:24px;flex-wrap:wrap;">
-          <div style="font-size:12px;color:#1D4ED8;"><strong>100%</strong> de los NNA registrados son atendidos por oficinas de la Fundación Mendoza (FEM)</div>
-          <div style="font-size:12px;color:#64748B;">Supuesto conservador: 40% con 1 punto · 60% con 2 puntos de atención</div>
+        <div style="padding:12px 16px;background:#ECF2FA;border-top:1px solid #D9E5F5;display:flex;gap:24px;flex-wrap:wrap;">
+          <div style="font-size:12px;color:#002F6C;"><strong>100%</strong> de los NNA registrados son atendidos por oficinas de la Fundación Mendoza (FEM)</div>
+          <div style="font-size:12px;color:#4B5563;">Supuesto conservador: 40% con 1 punto · 60% con 2 puntos de atención</div>
         </div>
       </div>
     `;
@@ -3443,7 +3443,7 @@ function renderMarcadoresMigrantes(map) {
   const layer = L.layerGroup().addTo(map);
   window._mapaMigrantesLayer = layer;
 
-  const COLORES = { en_transito:'#F59E0B', atendido:'#3B82F6', derivado:'#8B5CF6', ubicado:'#10B981' };
+  const COLORES = { en_transito:'#F59E0B', atendido:'#003B8F', derivado:'#8B5CF6', ubicado:'#17A65A' };
   const ESTADO_LABEL = { en_transito:'En tránsito', atendido:'Atendido', derivado:'Derivado', ubicado:'Ubicado' };
 
   // ── Aplicar filtros y agrupar por punto ──
@@ -3509,8 +3509,8 @@ function renderMarcadoresMigrantes(map) {
       }
 
       const popupHtml = '<div style="font-family:Inter,sans-serif;min-width:200px;">'
-        + '<b style="font-size:14px;color:#1A2B4B;">&#x1F4CD; ' + g.label + '</b>'
-        + '<p style="font-size:12px;color:#64748B;margin:4px 0 8px;">' + g.total.toLocaleString('es') + ' migrante' + (g.total !== 1 ? 's' : '') + '</p>'
+        + '<b style="font-size:14px;color:#002F6C;">&#x1F4CD; ' + g.label + '</b>'
+        + '<p style="font-size:12px;color:#4B5563;margin:4px 0 8px;">' + g.total.toLocaleString('es') + ' migrante' + (g.total !== 1 ? 's' : '') + '</p>'
         + breakdownHtml
         + '</div>';
 
@@ -3523,9 +3523,9 @@ function renderMarcadoresMigrantes(map) {
   const badge = document.getElementById('mapa-conteo-badge');
   if (badge) {
     if (puntos.length > 0) {
-      badge.innerHTML = '<span style="color:#2563EB;font-weight:700;">' + total.toLocaleString('es') + '</span>'
+      badge.innerHTML = '<span style="color:#003B8F;font-weight:700;">' + total.toLocaleString('es') + '</span>'
         + ' migrante' + (total !== 1 ? 's' : '') + ' en '
-        + '<span style="color:#2563EB;font-weight:700;">' + puntos.length + '</span>'
+        + '<span style="color:#003B8F;font-weight:700;">' + puntos.length + '</span>'
         + ' localidad' + (puntos.length !== 1 ? 'es' : '')
         + (sinCoords > 0 ? ' · <span style="color:#94A3B8;">' + sinCoords.toLocaleString('es') + ' sin coordenadas</span>' : '');
     } else {
@@ -3684,31 +3684,31 @@ function renderRutasMapa() {
       if (!coords) return;
       const isSel  = ciudadF === c.ciudadId;
       const radio  = Math.max(14, Math.min(8 + Math.round(Math.sqrt(c.nnaUnicos) * 0.6), 40));
-      const color  = isSel ? '#DC2626' : '#1A2B4B';
+      const color  = isSel ? '#DC2626' : '#002F6C';
 
       const circle = L.circleMarker(coords, {
         radius: radio, fillColor: color, color: '#fff',
         weight: isSel ? 3 : 2, opacity: 1, fillOpacity: isSel ? 1 : 0.85,
       });
       circle.bindPopup(`<div style="font-family:Inter,sans-serif;min-width:200px;">
-        <b style="font-size:14px;color:#1A2B4B;">📍 ${c.label}</b>
-        <p style="font-size:11px;color:#64748B;margin:3px 0 8px;">${c.paisLabel}</p>
+        <b style="font-size:14px;color:#002F6C;">📍 ${c.label}</b>
+        <p style="font-size:11px;color:#4B5563;margin:3px 0 8px;">${c.paisLabel}</p>
         <div style="display:flex;flex-direction:column;gap:4px;">
           <div style="display:flex;justify-content:space-between;font-size:12px;">
-            <span style="color:#64748B;">NNA únicos:</span>
-            <strong style="color:#1A2B4B;">${c.nnaUnicos.toLocaleString('es')}</strong>
+            <span style="color:#4B5563;">NNA únicos:</span>
+            <strong style="color:#002F6C;">${c.nnaUnicos.toLocaleString('es')}</strong>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:12px;">
-            <span style="color:#64748B;">Atenciones:</span>
-            <strong style="color:#2563EB;">${c.atenciones.toLocaleString('es')}</strong>
+            <span style="color:#4B5563;">Atenciones:</span>
+            <strong style="color:#003B8F;">${c.atenciones.toLocaleString('es')}</strong>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:12px;">
-            <span style="color:#64748B;">Multi-punto:</span>
+            <span style="color:#4B5563;">Multi-punto:</span>
             <strong style="color:#7C3AED;">${c.multiPunto.toLocaleString('es')}</strong>
           </div>
           <div style="display:flex;justify-content:space-between;font-size:12px;">
-            <span style="color:#64748B;">% red FEM:</span>
-            <strong style="color:#1A2B4B;">${c.pct}%</strong>
+            <span style="color:#4B5563;">% red FEM:</span>
+            <strong style="color:#002F6C;">${c.pct}%</strong>
           </div>
         </div>
       </div>`, { maxWidth: 240, closeButton: false });
@@ -3759,7 +3759,7 @@ function renderRutasMapa() {
         const weight = Math.max(1.5, Math.min(1 + r.vol / 120, 6));
         // Rutas filtradas se destacan en rojo; de fondo, en azul tenue
         const line = L.polyline([c1, c2], {
-          color:   ciudadF ? '#DC2626' : '#2563EB',
+          color:   ciudadF ? '#DC2626' : '#003B8F',
           weight:  ciudadF ? Math.min(weight * 1.4, 8) : weight,
           opacity: ciudadF ? 0.75 : 0.32,
           dashArray: '6 4',
@@ -3864,7 +3864,7 @@ function renderRutasMapa() {
         destDot.bindPopup(
           '<div style="font-family:Inter,sans-serif;">'
           + '<b style="color:#7C3AED;">🎯 Destino final</b>'
-          + '<p style="margin:4px 0 0;font-size:14px;color:#1A2B4B;font-weight:700;">' + destLabel + '</p>'
+          + '<p style="margin:4px 0 0;font-size:14px;color:#002F6C;font-weight:700;">' + destLabel + '</p>'
           + '<p style="margin:4px 0 0;font-size:11px;color:#94A3B8;">Destino declarado en última entrevista</p>'
           + '</div>',
           { closeButton: false, maxWidth: 260 }
@@ -3882,13 +3882,13 @@ function renderRutasMapa() {
           var lugLabel = _pasoLabel(paso, 'Punto ' + (idx+1));
           var isFirst  = idx === 0;
           var isLast   = idx === puntos.length - 1;
-          var color    = isFirst ? '#16A34A' : '#DC2626';
+          var color    = isFirst ? '#17A65A' : '#DC2626';
           var titulo   = isFirst ? '🟢 1ª entrevista' : '🔴 2ª entrevista';
           var dot = L.circleMarker(pt, {
             radius: 10, fillColor: color, color: '#fff', weight: 2, fillOpacity: 1,
           });
           dot.bindPopup('<div style="font-family:Inter,sans-serif;">'
-            + '<b style="color:#1A2B4B;">' + titulo + '</b>'
+            + '<b style="color:#002F6C;">' + titulo + '</b>'
             + '<p style="margin:4px 0 0;font-size:12px;color:#475569;">' + lugLabel + '</p>'
             + (paso && paso.fecha ? '<p style="margin:2px 0 0;font-size:11px;color:#94A3B8;">' + paso.fecha + '</p>' : '')
             + '</div>', { closeButton: false });
@@ -3916,7 +3916,7 @@ function renderRutasMapa() {
             radius: 12, fillColor: '#DC2626', color: '#fff', weight: 3, fillOpacity: 1,
           });
           uniqDot.bindPopup('<div style="font-family:Inter,sans-serif;">'
-            + '<b style="color:#1A2B4B;">📍 ' + loc.label + '</b>'
+            + '<b style="color:#002F6C;">📍 ' + loc.label + '</b>'
             + '<p style="font-size:12px;color:#475569;margin:4px 0 0;">Punto de atención registrado</p>'
             + '</div>', { closeButton: false });
           addLayer('nna_punto_unico', uniqDot);
@@ -3936,7 +3936,7 @@ function renderRutasMapa() {
 
   // ── 4. Modo "solo puntos actuales" ──
   if (modo === 'puntos') {
-    const COLORES_EST = { en_transito:'#F59E0B', atendido:'#3B82F6', derivado:'#8B5CF6', ubicado:'#10B981' };
+    const COLORES_EST = { en_transito:'#F59E0B', atendido:'#003B8F', derivado:'#8B5CF6', ubicado:'#17A65A' };
     const lista = ciudadF
       ? migrantes.filter(m => m.ruta?.some(p => p.ciudadId === ciudadF) || m.ciudadActualId === ciudadF)
       : migrantes;
@@ -3963,7 +3963,7 @@ function renderRutasMapa() {
       });
       const marker = L.marker(g.coords, { icon });
       marker.bindPopup(`<div style="font-family:Inter,sans-serif;">
-        <b style="color:#1A2B4B;">📍 ${g.label}</b>
+        <b style="color:#002F6C;">📍 ${g.label}</b>
         <p style="font-size:12px;color:#475569;margin:4px 0 0;">${g.items.length} NNA en este punto</p>
       </div>`, { closeButton: false });
       addLayer('punto_' + i, marker);
@@ -3984,10 +3984,10 @@ function renderRutasMapa() {
       badge.innerHTML = `Mostrando ruta de <strong style="color:#DC2626;">${_nombre.trim()}</strong> · ${_totalPts} punto${_totalPts !== 1 ? 's' : ''} de atención registrado${_totalPts !== 1 ? 's' : ''}`;
     } else if (ciudadF) {
       const c = ciudadesData.find(x => x.ciudadId === ciudadF);
-      if (c) badge.innerHTML = `Ciudad seleccionada: <strong style="color:#1A2B4B;">${c.label}</strong> · <strong>${c.nnaUnicos.toLocaleString('es')}</strong> NNA únicos · <strong>${c.atenciones.toLocaleString('es')}</strong> atenciones`;
+      if (c) badge.innerHTML = `Ciudad seleccionada: <strong style="color:#002F6C;">${c.label}</strong> · <strong>${c.nnaUnicos.toLocaleString('es')}</strong> NNA únicos · <strong>${c.atenciones.toLocaleString('es')}</strong> atenciones`;
     } else {
       const total = ciudadesData.reduce((s, c) => s + c.nnaUnicos, 0) || 4862;
-      badge.innerHTML = `Red completa FEM · <strong style="color:#1A2B4B;">${total.toLocaleString('es')}</strong> NNA únicos en <strong>${ciudadesData.length || 8}</strong> ciudades`;
+      badge.innerHTML = `Red completa FEM · <strong style="color:#002F6C;">${total.toLocaleString('es')}</strong> NNA únicos en <strong>${ciudadesData.length || 8}</strong> ciudades`;
     }
   }
 }
@@ -4047,7 +4047,7 @@ function viewSeguridad(container, seccion) {
                     ${SECCIONES.map(s=>`
                       <td style="text-align:center;">
                         ${perms.includes(s)
-                          ? '<span style="color:#16A34A;font-size:16px;">✓</span>'
+                          ? '<span style="color:#17A65A;font-size:16px;">✓</span>'
                           : '<span style="color:#D1D5DB;font-size:14px;">—</span>'}
                       </td>`).join('')}
                     <td style="text-align:center;"><strong>${count}</strong></td>
@@ -4068,17 +4068,17 @@ function viewSeguridad(container, seccion) {
               const perms = getPermisosUsuario(u);
               return `<div style="border:1px solid #E2E8F0;border-radius:10px;padding:14px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                  <div style="width:34px;height:34px;border-radius:50%;background:#2563EB;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">
+                  <div style="width:34px;height:34px;border-radius:50%;background:#003B8F;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">
                     ${((u.nombres[0]||'')+(u.apellidos[0]||'')).toUpperCase()||'?'}
                   </div>
                   <div>
-                    <div style="font-weight:700;font-size:13px;color:#1A2B4B;">${u.nombres} ${u.apellidos}</div>
-                    <div style="font-size:11px;color:#64748B;">${u.rol}</div>
+                    <div style="font-weight:700;font-size:13px;color:#002F6C;">${u.nombres} ${u.apellidos}</div>
+                    <div style="font-size:11px;color:#4B5563;">${u.rol}</div>
                   </div>
                 </div>
                 <div style="font-size:11px;color:#94A3B8;margin-bottom:8px;font-family:monospace;word-break:break-all;">${u.email}</div>
                 <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                  ${perms.map(p=>`<span style="background:#EFF6FF;color:#2563EB;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;">${p}</span>`).join('')}
+                  ${perms.map(p=>`<span style="background:#ECF2FA;color:#003B8F;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;">${p}</span>`).join('')}
                   ${u.esGlobal?'<span style="background:#FEF3C7;color:#B45309;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;">global</span>':''}
                 </div>
               </div>`;
@@ -4104,7 +4104,7 @@ function viewSeguridad(container, seccion) {
               <span style="font-size:22px;">📧</span>
               <div>
                 <div style="font-weight:700;font-size:14px;">Email + Contraseña</div>
-                <div style="font-size:12px;color:#64748B;">Autenticación con correo y clave personal</div>
+                <div style="font-size:12px;color:#4B5563;">Autenticación con correo y clave personal</div>
               </div>
             </div>
             <span class="badge badge-success">Activo</span>
@@ -4114,7 +4114,7 @@ function viewSeguridad(container, seccion) {
               <svg width="22" height="22" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
               <div>
                 <div style="font-weight:700;font-size:14px;">Google OAuth</div>
-                <div style="font-size:12px;color:#64748B;">Inicio de sesión con cuenta de Google</div>
+                <div style="font-size:12px;color:#4B5563;">Inicio de sesión con cuenta de Google</div>
               </div>
             </div>
             <span class="badge badge-success">Activo</span>
@@ -4124,7 +4124,7 @@ function viewSeguridad(container, seccion) {
               <span style="font-size:22px;">✉️</span>
               <div>
                 <div style="font-weight:700;font-size:14px;">Invitaciones por email</div>
-                <div style="font-size:12px;color:#64748B;">Usuarios invitados por administrador vía Edge Function</div>
+                <div style="font-size:12px;color:#4B5563;">Usuarios invitados por administrador vía Edge Function</div>
               </div>
             </div>
             <span class="badge badge-success">Activo</span>
@@ -4138,21 +4138,21 @@ function viewSeguridad(container, seccion) {
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F1F5F9;">
             <div>
               <div style="font-weight:600;font-size:13px;">Proveedor de autenticación</div>
-              <div style="font-size:12px;color:#64748B;">Supabase Auth (PostgreSQL)</div>
+              <div style="font-size:12px;color:#4B5563;">Supabase Auth (PostgreSQL)</div>
             </div>
             <span class="badge badge-info">Supabase</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F1F5F9;">
             <div>
               <div style="font-weight:600;font-size:13px;">Expiración de sesión</div>
-              <div style="font-size:12px;color:#64748B;">Configurado en Supabase Auth → Settings</div>
+              <div style="font-size:12px;color:#4B5563;">Configurado en Supabase Auth → Settings</div>
             </div>
             <span style="font-size:12px;font-weight:600;color:#475569;">3600 seg (1 hora)</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
             <div>
               <div style="font-weight:600;font-size:13px;">Panel de administración</div>
-              <div style="font-size:12px;color:#64748B;">Gestión avanzada de usuarios y sesiones</div>
+              <div style="font-size:12px;color:#4B5563;">Gestión avanzada de usuarios y sesiones</div>
             </div>
             <a href="https://supabase.com/dashboard/project/izcqcnunryhntojhxywu/auth/users" target="_blank" class="btn btn-secondary btn-sm">Abrir Supabase →</a>
           </div>
@@ -4172,12 +4172,12 @@ function viewUsuarios(container) {
     const rows = usuarios.map(u => {
       const org = orgs.find(o => o.id === u.orgId);
       const orgLabel = u.esGlobal
-        ? `<span style="background:#EFF6FF;color:#2563EB;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">🌐 Global</span>`
+        ? `<span style="background:#ECF2FA;color:#003B8F;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;">🌐 Global</span>`
         : (org ? org.nombre : (u.orgIds?.length > 1 ? `${u.orgIds.length} organizaciones` : '—'));
       const estadoBadge = u.activo
         ? `<span class="badge badge-atendido">Activo</span>`
         : `<span class="badge badge-derivado">Suspendido</span>`;
-      const rolColor = u.rol === 'Administrador' ? '#6D28D9' : u.esGlobal ? '#0F766E' : '#2563EB';
+      const rolColor = u.rol === 'Administrador' ? '#6D28D9' : u.esGlobal ? '#0F766E' : '#003B8F';
       return `
         <tr>
           <td>
@@ -4186,15 +4186,15 @@ function viewUsuarios(container) {
                 ${(u.nombres[0]||'') + (u.apellidos[0]||'')}
               </div>
               <div>
-                <div style="font-weight:700;color:#1A2B4B;font-size:13px;">${u.nombres} ${u.apellidos}</div>
-                <div style="font-size:11px;color:#64748B;">${u.email || '—'}</div>
+                <div style="font-weight:700;color:#002F6C;font-size:13px;">${u.nombres} ${u.apellidos}</div>
+                <div style="font-size:11px;color:#4B5563;">${u.email || '—'}</div>
               </div>
             </div>
           </td>
           <td><span style="background:${rolColor}15;color:${rolColor};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">${u.rol}</span></td>
           <td style="font-size:12px;color:#475569;">${orgLabel}</td>
           <td>${estadoBadge}</td>
-          <td style="font-size:12px;color:#64748B;">${u.ultimoAcceso || '—'}</td>
+          <td style="font-size:12px;color:#4B5563;">${u.ultimoAcceso || '—'}</td>
           <td>
             <div style="display:flex;gap:6px;">
               <button class="btn btn-secondary btn-sm" onclick="navigate('/configuracion/usuario/nuevo',{editId:'${u.id}'})">✏ Editar</button>
@@ -4228,7 +4228,7 @@ function viewUsuarios(container) {
             ${usuarios.map(u => `<option value="${u.id}" ${AppState.currentUser?.id === u.id ? 'selected' : ''}>${u.nombres} ${u.apellidos} (${u.rol})</option>`).join('')}
           </select>
           <button class="btn btn-secondary btn-sm" onclick="simularAccesoUsuario(document.getElementById('sel-simular-usuario').value)">Aplicar</button>
-          <div id="sim-user-badge" style="font-size:12px;color:#2563EB;"></div>
+          <div id="sim-user-badge" style="font-size:12px;color:#003B8F;"></div>
         </div>
         <div style="overflow-x:auto;">
           <table class="data-table" style="min-width:700px;">
@@ -4255,7 +4255,7 @@ function viewUsuarioForm(container, params = {}) {
     const orgsCheckboxes = orgs.map(o => `
       <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:#334155;transition:background .15s;"
         onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
-        <input type="checkbox" name="orgAcceso" value="${o.id}" style="accent-color:#2563EB;"
+        <input type="checkbox" name="orgAcceso" value="${o.id}" style="accent-color:#003B8F;"
           ${u && u.orgIds && u.orgIds.includes(o.id) ? 'checked' : ''}>
         <span style="font-size:11px;color:#94A3B8;margin-right:2px;">${AppState.catalogos.paises.find(p=>p.id===o.paisId)?.bandera||''}</span>
         ${o.nombre}
@@ -4282,7 +4282,7 @@ function viewUsuarioForm(container, params = {}) {
           </div>
         </div>
         <div class="form-group" style="margin-bottom:16px;">
-          <label class="form-label">Correo electrónico * <span style="font-size:11px;color:#64748B;">(se enviará la invitación aquí)</span></label>
+          <label class="form-label">Correo electrónico * <span style="font-size:11px;color:#4B5563;">(se enviará la invitación aquí)</span></label>
           <input type="email" id="usr-email" class="form-control" value="${u?.email||''}">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
@@ -4305,11 +4305,11 @@ function viewUsuarioForm(container, params = {}) {
         <!-- Permisos de acceso -->
         <div class="form-section-title fst-entrevista">Permisos de acceso a datos</div>
         <div class="form-group" style="margin-bottom:16px;">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:14px 16px;border:1.5px solid ${u?.esGlobal?'#2563EB':'#E2E8F0'};border-radius:10px;background:${u?.esGlobal?'#EFF6FF':'#fff'};transition:all .2s;" id="label-global">
-            <input type="checkbox" id="usr-es-global" style="accent-color:#2563EB;width:16px;height:16px;" ${u?.esGlobal?'checked':''} onchange="toggleAccesoGlobal(this.checked)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:14px 16px;border:1.5px solid ${u?.esGlobal?'#003B8F':'#E2E8F0'};border-radius:10px;background:${u?.esGlobal?'#ECF2FA':'#fff'};transition:all .2s;" id="label-global">
+            <input type="checkbox" id="usr-es-global" style="accent-color:#003B8F;width:16px;height:16px;" ${u?.esGlobal?'checked':''} onchange="toggleAccesoGlobal(this.checked)">
             <div>
-              <div style="font-weight:700;font-size:13px;color:#1A2B4B;">🌐 Acceso Global</div>
-              <div style="font-size:11px;color:#64748B;margin-top:2px;">Puede ver reportes de todas las organizaciones de la plataforma</div>
+              <div style="font-weight:700;font-size:13px;color:#002F6C;">🌐 Acceso Global</div>
+              <div style="font-size:11px;color:#4B5563;margin-top:2px;">Puede ver reportes de todas las organizaciones de la plataforma</div>
             </div>
           </label>
         </div>
@@ -4332,11 +4332,11 @@ function viewUsuarioForm(container, params = {}) {
           ].map(s => {
             const permsU = u?.permisos?.length > 0 ? u.permisos : (PERMISOS_DEFAULT_ROL[u?.rol] || ['migrantes']);
             const checked = permsU.includes(s.key);
-            return `<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px;border:1.5px solid ${checked?'#2563EB':'#E2E8F0'};border-radius:10px;background:${checked?'#EFF6FF':'#fff'};transition:all .2s;" id="perm-label-${s.key}">
-              <input type="checkbox" name="permSeccion" value="${s.key}" style="accent-color:#2563EB;width:15px;height:15px;margin-top:2px;flex-shrink:0;" ${checked?'checked':''} onchange="togglePermLabel('${s.key}',this.checked)">
+            return `<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px;border:1.5px solid ${checked?'#003B8F':'#E2E8F0'};border-radius:10px;background:${checked?'#ECF2FA':'#fff'};transition:all .2s;" id="perm-label-${s.key}">
+              <input type="checkbox" name="permSeccion" value="${s.key}" style="accent-color:#003B8F;width:15px;height:15px;margin-top:2px;flex-shrink:0;" ${checked?'checked':''} onchange="togglePermLabel('${s.key}',this.checked)">
               <div>
-                <div style="font-weight:700;font-size:12px;color:#1A2B4B;">${s.label}</div>
-                <div style="font-size:11px;color:#64748B;">${s.desc}</div>
+                <div style="font-weight:700;font-size:12px;color:#002F6C;">${s.label}</div>
+                <div style="font-size:11px;color:#4B5563;">${s.desc}</div>
               </div>
             </label>`;
           }).join('')}
@@ -4360,16 +4360,16 @@ function toggleAccesoGlobal(checked) {
   const label   = document.getElementById('label-global');
   if (wrapper) wrapper.style.display = checked ? 'none' : 'block';
   if (label) {
-    label.style.borderColor = checked ? '#2563EB' : '#E2E8F0';
-    label.style.background  = checked ? '#EFF6FF' : '#fff';
+    label.style.borderColor = checked ? '#003B8F' : '#E2E8F0';
+    label.style.background  = checked ? '#ECF2FA' : '#fff';
   }
 }
 
 function togglePermLabel(key, checked) {
   const label = document.getElementById(`perm-label-${key}`);
   if (label) {
-    label.style.borderColor = checked ? '#2563EB' : '#E2E8F0';
-    label.style.background  = checked ? '#EFF6FF' : '#fff';
+    label.style.borderColor = checked ? '#003B8F' : '#E2E8F0';
+    label.style.background  = checked ? '#ECF2FA' : '#fff';
   }
 }
 
@@ -4515,19 +4515,19 @@ function mostrarModalInvitacionReal({ nombres, email, rol, orgPrinc }) {
     <div id="${mid}" style="position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);">
       <div style="background:#fff;border-radius:20px;padding:36px;width:100%;max-width:480px;box-shadow:0 32px 96px rgba(0,0,0,.22);text-align:center;">
         <div style="font-size:52px;margin-bottom:12px;">✅</div>
-        <h3 style="font-size:18px;font-weight:800;color:#1A2B4B;margin:0 0 8px;">¡Invitación enviada!</h3>
+        <h3 style="font-size:18px;font-weight:800;color:#002F6C;margin:0 0 8px;">¡Invitación enviada!</h3>
         <p style="font-size:14px;color:#475569;margin:0 0 6px;">
           <strong>${nombres}</strong> recibirá un correo en <strong>${email}</strong>
         </p>
-        <p style="font-size:13px;color:#64748B;margin:0 0 24px;">
+        <p style="font-size:13px;color:#4B5563;margin:0 0 24px;">
           El link incluye un botón para establecer su contraseña y acceder como <em>${rol}</em> de <strong>${orgNombre}</strong>.
         </p>
-        <div style="background:#EFF6FF;border-radius:10px;padding:12px 16px;font-size:12px;color:#2563EB;margin-bottom:20px;text-align:left;line-height:1.6;">
+        <div style="background:#ECF2FA;border-radius:10px;padding:12px 16px;font-size:12px;color:#003B8F;margin-bottom:20px;text-align:left;line-height:1.6;">
           <strong>¿No llegó el correo?</strong><br>
           Revisa carpeta Spam · El link expira en 24 horas · Usa el botón "✉ Reenviar" en la lista de usuarios.
         </div>
         <button onclick="document.getElementById('${mid}').remove();navigate('/configuracion/usuarios');"
-          style="width:100%;padding:13px;border:none;border-radius:10px;background:#2563EB;color:#fff;cursor:pointer;font-weight:700;font-size:14px;">
+          style="width:100%;padding:13px;border:none;border-radius:10px;background:#003B8F;color:#fff;cursor:pointer;font-weight:700;font-size:14px;">
           Ver lista de usuarios
         </button>
       </div>
@@ -4543,8 +4543,8 @@ function mostrarModalEdgeFnPendiente({ nombres, apellidos, email, rol, orgPrinc 
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
           <div style="background:#FEF9C3;border-radius:12px;padding:10px;font-size:20px;">⚙️</div>
           <div>
-            <h3 style="font-size:15px;font-weight:800;color:#1A2B4B;margin:0;">Falta deployar la Edge Function</h3>
-            <p style="font-size:12px;color:#64748B;margin:4px 0 0;">El usuario fue guardado localmente en esta sesión</p>
+            <h3 style="font-size:15px;font-weight:800;color:#002F6C;margin:0;">Falta deployar la Edge Function</h3>
+            <p style="font-size:12px;color:#4B5563;margin:4px 0 0;">El usuario fue guardado localmente en esta sesión</p>
           </div>
         </div>
         <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px 16px;font-size:12px;color:#334155;line-height:1.8;margin-bottom:20px;">
@@ -4555,12 +4555,12 @@ function mostrarModalEdgeFnPendiente({ nombres, apellidos, email, rol, orgPrinc 
           </code>
           <br>
           O crea la función manualmente en:<br>
-          <a href="https://supabase.com/dashboard/project/izcqcnunryhntojhxywu/functions" target="_blank" style="color:#2563EB;">
+          <a href="https://supabase.com/dashboard/project/izcqcnunryhntojhxywu/functions" target="_blank" style="color:#003B8F;">
             supabase.com → Edge Functions
           </a>
         </div>
         <button onclick="document.getElementById('${mid}').remove();navigate('/configuracion/usuarios');"
-          style="width:100%;padding:12px;border:none;border-radius:8px;background:#2563EB;color:#fff;cursor:pointer;font-weight:700;">
+          style="width:100%;padding:12px;border:none;border-radius:8px;background:#003B8F;color:#fff;cursor:pointer;font-weight:700;">
           Entendido, ir a usuarios
         </button>
       </div>
@@ -4656,10 +4656,10 @@ function renderBannerFiltroOrg() {
   const banner = document.createElement('div');
   banner.id = 'org-filter-banner';
   banner.innerHTML = `
-    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1E40AF;">
+    <div style="background:#ECF2FA;border:1px solid #B8CDEB;border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1E40AF;">
       <span>🏢</span>
       <span>Viendo datos de: <strong>${label}</strong> — como <strong>${cu.nombres} ${cu.apellidos} (${cu.rol})</strong></span>
-      <button onclick="simularAccesoUsuario('USR00')" style="margin-left:auto;background:none;border:1px solid #BFDBFE;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;color:#2563EB;font-weight:600;">Ver todo</button>
+      <button onclick="simularAccesoUsuario('USR00')" style="margin-left:auto;background:none;border:1px solid #B8CDEB;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;color:#003B8F;font-weight:600;">Ver todo</button>
     </div>`;
   const mainContent = document.getElementById('main-content');
   if (mainContent) mainContent.prepend(banner);
@@ -4707,11 +4707,11 @@ function viewMiPerfil(container) {
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Correo electrónico</label>
-            <input type="email" class="form-control" value="${u.email||''}" readonly style="background:#F8FAFC;color:#64748B;">
+            <input type="email" class="form-control" value="${u.email||''}" readonly style="background:#F8FAFC;color:#4B5563;">
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Rol / Cargo</label>
-            <input type="text" class="form-control" value="${u.rol}" readonly style="background:#F8FAFC;color:#64748B;">
+            <input type="text" class="form-control" value="${u.rol}" readonly style="background:#F8FAFC;color:#4B5563;">
           </div>
           <div style="border-top:1px solid #F1F5F9;padding-top:14px;margin-top:4px;">
             <div style="font-size:12px;color:#94A3B8;">Último acceso: <strong style="color:#475569;">${u.ultimoAcceso||'—'}</strong></div>
@@ -4725,14 +4725,14 @@ function viewMiPerfil(container) {
             <div style="margin-bottom:14px;">
               <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Tipo de acceso</div>
               ${u.esGlobal
-                ? '<span style="background:#DBEAFE;color:#1D4ED8;padding:5px 14px;border-radius:20px;font-weight:700;font-size:12px;">🌐 Global</span>'
+                ? '<span style="background:#D9E5F5;color:#002F6C;padding:5px 14px;border-radius:20px;font-weight:700;font-size:12px;">🌐 Global</span>'
                 : '<span style="background:#DCFCE7;color:#166534;padding:5px 14px;border-radius:20px;font-weight:700;font-size:12px;">🏢 Por organización</span>'
               }
             </div>
             ${orgPrincipal ? `
             <div style="margin-bottom:14px;">
               <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Organización principal</div>
-              <div style="font-size:13px;font-weight:600;color:#1A2B4B;">${orgPrincipal.nombre}</div>
+              <div style="font-size:13px;font-weight:600;color:#002F6C;">${orgPrincipal.nombre}</div>
             </div>` : ''}
             <div>
               <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Organizaciones visibles</div>
@@ -4753,7 +4753,7 @@ function viewMiPerfil(container) {
                   <span style="font-size:16px;">${s.icon}</span>
                   <div style="flex:1;">
                     <div style="font-size:12px;font-weight:700;color:${activo?'#166534':'#991B1B'};">${s.label}</div>
-                    <div style="font-size:11px;color:#64748B;">${s.desc}</div>
+                    <div style="font-size:11px;color:#4B5563;">${s.desc}</div>
                   </div>
                   <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:${activo?'#DCFCE7':'#FEE2E2'};color:${activo?'#166534':'#991B1B'};">
                     ${activo ? '✓ Activo' : '✗ Sin acceso'}

@@ -20,3 +20,6 @@ project_context.md
 # Seeds / migraciones internas (opcionales — comentar si quieres incluirlos)
 # seed_migrantes.sql
 # seed_synthetic.sql
+
+# Assets de marca (excepción a *.png)
+!assets/*.png
