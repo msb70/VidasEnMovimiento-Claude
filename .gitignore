@@ -23,3 +23,10 @@ project_context.md
 
 # Assets de marca (excepción a *.png)
 !assets/*.png
+
+# Basura / temporales / entregables internos
+vidasenmovimiento_*.zip
+zi5uE8zS
+ziSOz5K6
+*_PARCHEADO.ts
+*.docx

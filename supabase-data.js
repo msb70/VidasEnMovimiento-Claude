@@ -558,7 +558,7 @@ function showCatalogModal(clave, titulo, item = null) {
   const fieldsHTML = fields.map(f => `
     <div class="form-group" style="margin-bottom:14px;">
       <label style="display:block;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">${f.label}${f.required ? ' *' : ''}</label>
-      <input type="${f.type || 'text'}" id="${modalId}-${f.key}" value="${item ? (item[f.key] || '') : ''}"
+      <input type="${f.type || 'text'}" id="${modalId}-${f.key}" value="${escapeHtml(item ? (item[f.key] || '') : '')}"
         ${isEdit && f.key === 'id' ? 'readonly style="background:#F8FAFC;color:#94A3B8;"' : ''}
         style="width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;"
         onfocus="this.style.borderColor='#003B8F'" onblur="this.style.borderColor='#E2E8F0'"/>

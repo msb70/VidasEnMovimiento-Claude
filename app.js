@@ -183,7 +183,7 @@ function showToast(msg, tipo = 'success', duracion = 3200) {
   const container = document.getElementById('toast-container');
   const t = document.createElement('div');
   t.className = `toast ${tipo}`;
-  t.innerHTML = `<span class="toast-icon">${icons[tipo]}</span><span class="toast-msg">${msg}</span>`;
+  t.innerHTML = `<span class="toast-icon">${icons[tipo]}</span><span class="toast-msg">${escapeHtml(msg)}</span>`;
   container.appendChild(t);
   setTimeout(() => {
     t.classList.add('exiting');
@@ -256,8 +256,21 @@ function serviciosBadges(ids) {
   }).join('');
 }
 
+// ─── SEGURIDAD: escape de HTML para datos dinámicos (anti-XSS) ──
+// Escapa los 5 caracteres peligrosos. Seguro tanto en contenido de
+// elementos como dentro de atributos entre comillas dobles.
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function avatarIniciales(nombre) {
-  return nombre.split(' ').slice(0,2).map(p => p[0]).join('').toUpperCase();
+  return escapeHtml((nombre || '').split(' ').slice(0,2).map(p => p[0] || '').join('').toUpperCase());
 }
 
 function avatarColor(id) {
@@ -502,7 +515,7 @@ function viewDashboard(container) {
           </select>
           <select id="db-f-ong" class="form-control" style="width:auto;min-width:210px;" onchange="actualizarDashboard()">
             <option value="">Todas las ONGs</option>
-            ${AppState.organizaciones.map(o=>`<option value="${o.id}">${o.nombre}</option>`).join('')}
+            ${AppState.organizaciones.map(o=>`<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('')}
           </select>
           <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosDashboard()">✕ Limpiar</button>
           <span id="db-filtro-tag" style="display:none;background:#ECF2FA;color:#003B8F;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid #B8CDEB;"></span>
@@ -750,7 +763,7 @@ function viewDashboard(container) {
             return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F1F5F9;">
               <div style="width:20px;height:20px;background:#ECF2FA;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#003B8F;flex-shrink:0;">${i+1}</div>
               <div style="flex:1;min-width:0;">
-                <div style="font-size:12px;font-weight:600;color:#002F6C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.nombre}</div>
+                <div style="font-size:12px;font-weight:600;color:#002F6C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(o.nombre)}</div>
                 <div style="font-size:11px;color:#94A3B8;">${p?.bandera||''} ${p?.label||''} · FEM</div>
               </div>
               <div style="text-align:right;flex-shrink:0;">
@@ -956,7 +969,7 @@ function actualizarDashboard() {
     }
     const currentOrg = selOng.value;
     selOng.innerHTML = `<option value="">Todas las ONGs</option>` +
-      ongsSource.map(o => `<option value="${o.id}"${o.id === currentOrg ? ' selected' : ''}>${o.nombre}</option>`).join('');
+      ongsSource.map(o => `<option value="${o.id}"${o.id === currentOrg ? ' selected' : ''}>${escapeHtml(o.nombre)}</option>`).join('');
   }
 }
 
@@ -975,7 +988,7 @@ function limpiarFiltrosDashboard() {
   const selOng = document.getElementById('db-f-ong');
   if (selOng) {
     selOng.innerHTML = `<option value="">Todas las ONGs</option>` +
-      AppState.organizaciones.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+      AppState.organizaciones.map(o => `<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('');
   }
   actualizarDashboard();
 }
@@ -1025,7 +1038,7 @@ function viewMigranteListado(container, params = {}) {
         </select>
         <select class="filter-select" id="filter-ong-listado" onchange="aplicarFiltroListado()">
           <option value="">Todas las ONGs</option>
-          ${orgs.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('')}
+          ${orgs.map(o => `<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('')}
         </select>
         <button class="btn btn-secondary btn-sm" onclick="limpiarFiltrosListado()" style="margin-left:auto;">Limpiar</button>
       </div>
@@ -1081,7 +1094,7 @@ function limpiarFiltrosListado() {
   const _selOngL = document.getElementById('filter-ong-listado');
   if (_selOngL) {
     _selOngL.innerHTML = `<option value="">Todas las ONGs</option>` +
-      AppState.organizaciones.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+      AppState.organizaciones.map(o => `<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('');
   }
 
   renderListado();
@@ -1114,7 +1127,7 @@ function onCambiarPaisListado() {
       : AppState.organizaciones;
     _selOrg.value = '';
     _selOrg.innerHTML = `<option value="">Todas las ONGs</option>` +
-      _orgs.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+      _orgs.map(o => `<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('');
   }
 
   aplicarFiltroListado();
@@ -1138,7 +1151,7 @@ function onCambiarCiudadListado() {
     }
     _selOrg.value = '';
     _selOrg.innerHTML = `<option value="">Todas las ONGs</option>` +
-      _orgs.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+      _orgs.map(o => `<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('');
   }
 
   aplicarFiltroListado();
@@ -1188,7 +1201,7 @@ function renderListado() {
           <div class="flex gap-8" style="align-items:center;">
             <div class="avatar avatar-sm avatar-${color}">${avatarIniciales(Helpers.nombreCompleto(m))}</div>
             <div>
-              <div style="font-size:13px;font-weight:600;">${Helpers.nombreCompleto(m)}</div>
+              <div style="font-size:13px;font-weight:600;">${escapeHtml(Helpers.nombreCompleto(m))}</div>
             </div>
           </div>
         </td>
@@ -1234,7 +1247,7 @@ function confirmarArchivar(id) {
   if (!m) return;
   showModal({
     titulo: 'Archivar migrante',
-    body: `<p>¿Confirmas archivar a <strong>${Helpers.nombreCompleto(m)}</strong>?<br>El registro se moverá al archivo histórico.</p>`,
+    body: `<p>¿Confirmas archivar a <strong>${escapeHtml(Helpers.nombreCompleto(m))}</strong>?<br>El registro se moverá al archivo histórico.</p>`,
     acciones: [
       `<button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>`,
       `<button class="btn btn-danger" onclick="DB.migrantes.update('${id}',{estado:'archivado'});closeModal();applyListadoFilters();showToast('Migrante archivado','warning')">Archivar</button>`,
@@ -1400,7 +1413,7 @@ function viewMigranteDetalle(container, params = {}) {
               ${datoFicha('🌍 País entrevista', `${paisEntrevista?.bandera||''} ${paisEntrevista?.label||'—'}`)}
               ${datoFicha('🏙 Ciudad', ciudadEntrevista?.label || '—')}
               ${datoFicha('🏘 Municipio', municipioEntrev)}
-              ${datoFicha('✅ Consentimiento', consentimiento === true || consentimiento === 'si' ? '<span class="badge" style="background:#DCFCE7;color:#17A65A;">Otorgado</span>' : consentimiento === false || consentimiento === 'no' ? '<span class="badge" style="background:#FEE2E2;color:#DC2626;">No otorgado</span>' : '—')}
+              ${datoFicha('✅ Consentimiento', consentimiento === true || consentimiento === 'si' ? '<span class="badge" style="background:#DCFCE7;color:#17A65A;">Otorgado</span>' : consentimiento === false || consentimiento === 'no' ? '<span class="badge" style="background:#FEE2E2;color:#DC2626;">No otorgado</span>' : '—', true)}
             </div>
           </div>
 
@@ -1410,15 +1423,15 @@ function viewMigranteDetalle(container, params = {}) {
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div>
                 <div style="font-size:10px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Último centro de atención</div>
-                <p style="font-size:13px;color:var(--color-text);line-height:1.6;margin:0;${recUltimoCentro==='—'?'color:var(--color-text-muted);font-style:italic;':''}">${recUltimoCentro}</p>
+                <p style="font-size:13px;color:var(--color-text);line-height:1.6;margin:0;${recUltimoCentro==='—'?'color:var(--color-text-muted);font-style:italic;':''}">${escapeHtml(recUltimoCentro)}</p>
               </div>
               <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;">
                 <div style="font-size:10px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Siguiente puesto de atención</div>
-                <p style="font-size:13px;color:var(--color-text);line-height:1.6;margin:0;${recSiguiente==='—'?'color:var(--color-text-muted);font-style:italic;':''}">${recSiguiente}</p>
+                <p style="font-size:13px;color:var(--color-text);line-height:1.6;margin:0;${recSiguiente==='—'?'color:var(--color-text-muted);font-style:italic;':''}">${escapeHtml(recSiguiente)}</p>
               </div>
               <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;">
                 <div style="font-size:10px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Familia de referencia</div>
-                <p style="font-size:13px;color:var(--color-text);line-height:1.6;margin:0;${recFamilia==='—'?'color:var(--color-text-muted);font-style:italic;':''}">${recFamilia}</p>
+                <p style="font-size:13px;color:var(--color-text);line-height:1.6;margin:0;${recFamilia==='—'?'color:var(--color-text-muted);font-style:italic;':''}">${escapeHtml(recFamilia)}</p>
               </div>
             </div>
           </div>
@@ -1492,7 +1505,7 @@ function viewMigranteDetalle(container, params = {}) {
                       const gvGenero = AppState.catalogos.generos.find(g=>g.id===gv.generoId||g.id===gv.genero_id);
                       const gvNexo   = AppState.catalogos.nexos.find(n=>n.id===gv.nexoId||n.id===gv.nexo_id);
                       return `<tr>
-                        <td>${gv.nombre||gv.acompanante_nombre||'—'}</td>
+                        <td>${escapeHtml(gv.nombre||gv.acompanante_nombre||'—')}</td>
                         <td>${gvGenero?.label||'—'}</td>
                         <td>${gvNexo?.label||'—'}</td>
                         <td>${Helpers.formatFecha(gv.fechaNacimiento||gv.fecha_nacimiento)||'—'}</td>
@@ -1538,8 +1551,8 @@ function viewMigranteDetalle(container, params = {}) {
                           <div class="timeline-title">${pEv?.label||ev.paisId}${cEv?' · '+cEv.label:''}</div>
                           <div class="timeline-date">${Helpers.formatFecha(ev.fecha)}</div>
                         </div>
-                        ${oEv?`<div class="timeline-org">🏢 ${oEv.nombre}</div>`:'<div class="timeline-org text-light">Sin organización</div>'}
-                        ${ev.obs?`<div class="timeline-obs">${ev.obs}</div>`:''}
+                        ${oEv?`<div class="timeline-org">🏢 ${escapeHtml(oEv.nombre)}</div>`:'<div class="timeline-org text-light">Sin organización</div>'}
+                        ${ev.obs?`<div class="timeline-obs">${escapeHtml(ev.obs)}</div>`:''}
                         ${(ev.servicios||[]).length?`<div class="timeline-servicios">${serviciosBadges(ev.servicios)}</div>`:''}
                       </div>
                     </div>`;
@@ -1554,10 +1567,12 @@ function viewMigranteDetalle(container, params = {}) {
   });
 }
 
-function datoFicha(label, value) {
+// value se escapa por defecto. Pasar isHtml=true SOLO cuando el value
+// es HTML controlado por la app (ej. badges), nunca dato de usuario.
+function datoFicha(label, value, isHtml = false) {
   return `<div style="min-width:0;">
     <div style="font-size:10px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">${label}</div>
-    <div style="font-size:12px;font-weight:500;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${value}</div>
+    <div style="font-size:12px;font-weight:500;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${isHtml ? value : escapeHtml(value)}</div>
   </div>`;
 }
 
@@ -1591,7 +1606,7 @@ function abrirNuevoEvento(migranteId) {
           <label class="form-label">Organización</label>
           <select class="form-select" id="ev-org">
             <option value="">Sin organización</option>
-            ${orgs.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('')}
+            ${orgs.map(o => `<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('')}
           </select>
         </div>
         <div class="form-group">
@@ -1675,7 +1690,7 @@ function viewMigranteNuevo(container, params = {}) {
     const selNivEd    = `<option value="">-Seleccionar-</option>${nivelesEducacion.map(n=>`<option value="${n.id}">${n.label}</option>`).join('')}`;
     const selRazones  = `<option value="">-Seleccionar-</option>${razonesEmigracion.map(r=>`<option value="${r.id}">${r.label}</option>`).join('')}`;
     const selIngresos = `<option value="">-Seleccionar-</option>${generacionIngresos.map(g=>`<option value="${g.id}">${g.label}</option>`).join('')}`;
-    const selOrgs     = `<option value="">-Seleccionar-</option>${orgs.map(o=>`<option value="${o.id}">${o.nombre}</option>`).join('')}`;
+    const selOrgs     = `<option value="">-Seleccionar-</option>${orgs.map(o=>`<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('')}`;
 
     const v = (id) => m?.[id] || '';
     const sel = (id, opts) => opts.replace(`value="${v(id)}"`, `value="${v(id)}" selected`);
@@ -1988,7 +2003,7 @@ function grupoViajeFila(g = {}, idx = null, generos = [], nexos = []) {
   const selG = `<option value="">—</option>${generos.map(x=>`<option value="${x.id}" ${g.generoId===x.id?'selected':''}>${x.label}</option>`).join('')}`;
   const selN = `<option value="">—</option>${nexos.map(x=>`<option value="${x.id}" ${g.nexoId===x.id?'selected':''}>${x.label}</option>`).join('')}`;
   return `<tr id="gv-row-${i}">
-    <td><input type="text" class="form-input form-input-sm" placeholder="Nombre completo" value="${g.nombre||''}" id="gv-nombre-${i}"/></td>
+    <td><input type="text" class="form-input form-input-sm" placeholder="Nombre completo" value="${escapeHtml(g.nombre||'')}" id="gv-nombre-${i}"/></td>
     <td><select class="form-select form-select-sm" id="gv-genero-${i}">${selG}</select></td>
     <td><select class="form-select form-select-sm" id="gv-nexo-${i}">${selN}</select></td>
     <td><input type="date" class="form-input form-input-sm" value="${g.fechaNacimiento||''}" id="gv-fecha-${i}" onchange="calcEdadGrupo('${i}')"/></td>
@@ -2187,9 +2202,13 @@ async function guardarMigrante(editId) {
 
   } catch (err) {
     console.error('guardarMigrante error:', err);
-    // Si las tablas no existen aún en Supabase, simular guardado en local
-    if (err?.code === 'PGRST205' || err?.message?.includes('migrantes')) {
+    const code = err?.code;
+    if (code === 'PGRST205' || code === '42P01') {
+      // Tabla inexistente de verdad
       showToast('⚠ Tablas pendientes de migración. Ejecuta migration_migrantes.sql en Supabase.', 'warning');
+    } else if (code === '42501' || err?.status === 403) {
+      // Bloqueado por Row Level Security (permisos / organización)
+      showToast('No tienes permiso para registrar en esta organización. Selecciona una organización válida o contacta al administrador.', 'error');
     } else {
       showToast('Error al guardar: ' + (err.message || err), 'error');
     }
@@ -2258,7 +2277,7 @@ function viewExportacion(container) {
                   const p   = Helpers.paisById(m.paisActualId);
                   return `<tr>
                     <td style="font-family:monospace;color:var(--color-text-muted);">${m.id}</td>
-                    <td style="font-weight:600;">${Helpers.nombreCompleto(m)}</td>
+                    <td style="font-weight:600;">${escapeHtml(Helpers.nombreCompleto(m))}</td>
                     <td>${nac?.label||m.nacionalidadId}</td>
                     <td>${p?.bandera||''} ${p?.label||m.paisActualId}</td>
                     <td>${estadoBadge(m.estado)}</td>
@@ -2321,12 +2340,12 @@ function viewCatalogo(container, route, params) {
       const val = item[campo];
       if (campo === 'paisId') {
         const p = AppState.catalogos.paises.find(x => x.id === val);
-        return p ? `${p.bandera} ${p.label}` : (val || '—');
+        return p ? `${p.bandera} ${escapeHtml(p.label)}` : escapeHtml(val || '—');
       }
-      if (campo === 'label' && item.bandera) return `${item.bandera} ${val || ''}`;
-      if (campo === 'label' && item.icono)   return `${item.icono} ${val || ''}`;
-      if (campo === 'color' && val) return `<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${val};margin-right:6px;vertical-align:middle;"></span>${val}`;
-      return val || '—';
+      if (campo === 'label' && item.bandera) return `${item.bandera} ${escapeHtml(val || '')}`;
+      if (campo === 'label' && item.icono)   return `${item.icono} ${escapeHtml(val || '')}`;
+      if (campo === 'color' && val) return `<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${escapeHtml(val)};margin-right:6px;vertical-align:middle;"></span>${escapeHtml(val)}`;
+      return escapeHtml(val || '—');
     }
 
     const columnas = cfg.campos.filter(c => !CAMPOS_OCULTOS.includes(c) && HEADER_LABELS[c] !== '');
@@ -2357,7 +2376,7 @@ function viewCatalogo(container, route, params) {
                   <button class="btn btn-ghost btn-icon btn-sm" title="Editar"
                     onclick="showCatalogModal('${cfg.clave}','${cfg.titulo}',AppState.catalogos['${cfg.clave}'].find(x=>x.id==='${item.id}'))">✏️</button>
                   <button class="btn btn-ghost btn-icon btn-sm" title="Eliminar"
-                    onclick="deleteCatalogItem('${cfg.clave}','${item.id}','${(item.label||'').replace(/'/g,"\\'")}')">🗑</button>
+                    onclick="deleteCatalogItem('${cfg.clave}','${item.id}','${(item.label||'').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}')">🗑</button>
                 </div>
               </td>
             </tr>`).join('')}
@@ -2392,8 +2411,8 @@ function viewDatosOrganizaciones(container) {
               <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;">
                 <div class="avatar avatar-md avatar-${color}">${avatarIniciales(org.nombre)}</div>
                 <div style="flex:1;min-width:0;">
-                  <div style="font-weight:700;font-size:14px;">${org.nombre}</div>
-                  <div class="text-muted text-sm">${pais?.bandera||''} ${pais?.label||org.paisId} · ${ciudad?.label||org.ciudadId||''} · <em>${org.tipo}</em></div>
+                  <div style="font-weight:700;font-size:14px;">${escapeHtml(org.nombre)}</div>
+                  <div class="text-muted text-sm">${pais?.bandera||''} ${escapeHtml(pais?.label||org.paisId)} · ${escapeHtml(ciudad?.label||org.ciudadId||'')} · <em>${escapeHtml(org.tipo)}</em></div>
                 </div>
                 <div style="display:flex;gap:24px;flex-shrink:0;">
                   <div style="text-align:center;">
@@ -2411,13 +2430,13 @@ function viewDatosOrganizaciones(container) {
                 </div>
                 <div style="display:flex;gap:6px;flex-shrink:0;">
                   <button class="btn btn-ghost btn-icon btn-sm" title="Editar" onclick="showOrgModal('${org.id}')">✏️</button>
-                  <button class="btn btn-ghost btn-icon btn-sm" title="Eliminar" onclick="deleteOrgConfirm('${org.id}','${(org.nombre||'').replace(/'/g,"\\'")}')">🗑</button>
+                  <button class="btn btn-ghost btn-icon btn-sm" title="Eliminar" onclick="deleteOrgConfirm('${org.id}','${(org.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}')">🗑</button>
                 </div>
               </div>
               <div style="padding:12px 20px;border-top:1px solid var(--color-border);background:var(--color-bg);display:flex;gap:20px;flex-wrap:wrap;">
-                <div class="text-sm"><span class="fw-600">👤 Contacto:</span> ${org.contacto||'—'}</div>
-                <div class="text-sm"><span class="fw-600">📧</span> ${org.email||'—'}</div>
-                <div class="text-sm"><span class="fw-600">📞</span> ${org.telefono||'—'}</div>
+                <div class="text-sm"><span class="fw-600">👤 Contacto:</span> ${escapeHtml(org.contacto||'—')}</div>
+                <div class="text-sm"><span class="fw-600">📧</span> ${escapeHtml(org.email||'—')}</div>
+                <div class="text-sm"><span class="fw-600">📞</span> ${escapeHtml(org.telefono||'—')}</div>
                 <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;">
                   ${(org.servicios||[]).map(sid => {
                     const sv = AppState.catalogos.tiposServicio?.find(x=>x.id===sid);
@@ -2456,21 +2475,21 @@ function showOrgModal(orgId = null) {
         </div>
         ${row([
           field('id', 'Código ID', `<input id="${modalId}-id" value="${org?.id||''}" ${isEdit?'readonly style="'+fieldStyle+'background:#F8FAFC;color:#94A3B8;"':'style="'+fieldStyle+'"'}/>`),
-          field('nombre', 'Nombre de la organización', `<input id="${modalId}-nombre" value="${org?.nombre||''}" style="${fieldStyle}"/>`)
+          field('nombre', 'Nombre de la organización', `<input id="${modalId}-nombre" value="${escapeHtml(org?.nombre||'')}" style="${fieldStyle}"/>`)
         ])}
         ${row([
           field('tipo', 'Tipo', `<select id="${modalId}-tipo" style="${fieldStyle}"><option value="">Seleccionar…</option>${tipoOptions}</select>`),
-          field('contacto', 'Persona de contacto', `<input id="${modalId}-contacto" value="${org?.contacto||''}" style="${fieldStyle}"/>`)
+          field('contacto', 'Persona de contacto', `<input id="${modalId}-contacto" value="${escapeHtml(org?.contacto||'')}" style="${fieldStyle}"/>`)
         ])}
         ${row([
           field('pais_id', 'País', `<select id="${modalId}-pais_id" style="${fieldStyle}"><option value="">Seleccionar…</option>${paisOptions}</select>`),
           field('ciudad_id', 'Ciudad', `<select id="${modalId}-ciudad_id" style="${fieldStyle}"><option value="">Seleccionar…</option>${ciudadOptions}</select>`)
         ])}
         ${row([
-          field('email', 'Email', `<input id="${modalId}-email" type="email" value="${org?.email||''}" style="${fieldStyle}"/>`),
-          field('telefono', 'Teléfono', `<input id="${modalId}-telefono" value="${org?.telefono||''}" style="${fieldStyle}"/>`)
+          field('email', 'Email', `<input id="${modalId}-email" type="email" value="${escapeHtml(org?.email||'')}" style="${fieldStyle}"/>`),
+          field('telefono', 'Teléfono', `<input id="${modalId}-telefono" value="${escapeHtml(org?.telefono||'')}" style="${fieldStyle}"/>`)
         ])}
-        <div style="margin-bottom:14px;">${field('descripcion', 'Descripción', `<textarea id="${modalId}-descripcion" rows="2" style="${fieldStyle}height:auto;">${org?.descripcion||''}</textarea>`)}</div>
+        <div style="margin-bottom:14px;">${field('descripcion', 'Descripción', `<textarea id="${modalId}-descripcion" rows="2" style="${fieldStyle}height:auto;">${escapeHtml(org?.descripcion||'')}</textarea>`)}</div>
         <div style="display:flex;gap:10px;margin-top:24px;">
           <button onclick="document.getElementById('${modalId}').remove()" style="flex:1;padding:11px;border:1.5px solid #E2E8F0;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13px;color:#475569;">Cancelar</button>
           <button id="${modalId}-save" onclick="saveOrgModal('${modalId}','${orgId||''}')" style="flex:2;padding:11px;border:none;border-radius:8px;background:#003B8F;color:#fff;cursor:pointer;font-weight:700;font-size:13px;">${isEdit?'Guardar cambios':'Crear organización'}</button>
@@ -2536,7 +2555,7 @@ function viewConsultaOrgs(container) {
                 <td>
                   <div class="flex gap-8" style="align-items:center;">
                     <div class="avatar avatar-sm avatar-${avatarColor(org.id)}">${avatarIniciales(org.nombre)}</div>
-                    <div><div class="td-name">${org.nombre}</div><div class="td-muted">${org.ciudad}</div></div>
+                    <div><div class="td-name">${escapeHtml(org.nombre)}</div><div class="td-muted">${escapeHtml(org.ciudad)}</div></div>
                   </div>
                 </td>
                 <td>${pais?.bandera||''} ${pais?.label||org.paisId}</td>
@@ -2574,8 +2593,8 @@ function viewOrgsRecomendaciones(container) {
                 <div style="width:24px;text-align:center;font-size:12px;font-weight:700;color:var(--color-text-muted);">${i+1}</div>
                 <div style="flex:1;min-width:0;">
                   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                    <span style="font-weight:600;font-size:13px;">${org.nombre}</span>
-                    <span style="font-size:12px;color:var(--color-text-muted);">${pais?.bandera||''} ${pais?.label||''} · ${org.ciudad}</span>
+                    <span style="font-weight:600;font-size:13px;">${escapeHtml(org.nombre)}</span>
+                    <span style="font-size:12px;color:var(--color-text-muted);">${pais?.bandera||''} ${escapeHtml(pais?.label||'')} · ${escapeHtml(org.ciudad)}</span>
                   </div>
                   <div class="progress-bar-wrap">
                     <div class="progress-bar-fill" style="width:${pct}%;background:${color};"></div>
@@ -2616,12 +2635,12 @@ function viewOrgsCiudades(container) {
         <div style="display:flex;flex-direction:column;gap:12px;">
           ${Object.entries(byCiudad).map(([ciudad, orgs]) => `
             <div class="card card-sm">
-              <div style="font-weight:700;font-size:13px;margin-bottom:8px;">📍 ${ciudad}</div>
+              <div style="font-weight:700;font-size:13px;margin-bottom:8px;">📍 ${escapeHtml(ciudad)}</div>
               ${orgs.map(o => `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
                 <div class="avatar avatar-sm avatar-${avatarColor(o.id)}" style="width:24px;height:24px;font-size:10px;">${avatarIniciales(o.nombre)}</div>
                 <div>
-                  <div style="font-size:12px;font-weight:600;">${o.nombre}</div>
-                  <div class="text-xs text-muted">${o.tipo}</div>
+                  <div style="font-size:12px;font-weight:600;">${escapeHtml(o.nombre)}</div>
+                  <div class="text-xs text-muted">${escapeHtml(o.tipo)}</div>
                 </div>
               </div>`).join('')}
             </div>
@@ -2754,7 +2773,7 @@ function viewOrigenXOrg(container) {
               const migs = AppState.migrantes.filter(m=>m.orgActualId===org.id);
               const pCounts = paises.map(pid => migs.filter(m=>m.paisOrigenId===pid).length);
               return `<tr>
-                <td style="font-weight:600;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">${org.nombre}</td>
+                <td style="font-weight:600;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(org.nombre)}</td>
                 ${pCounts.map(c => `<td style="text-align:center;">${c>0?`<span class="badge badge-blue" style="min-width:24px;justify-content:center;">${c}</span>`:'<span style="color:var(--color-text-light);">—</span>'}</td>`).join('')}
                 <td><strong>${migs.length}</strong></td>
               </tr>`;
@@ -3285,7 +3304,7 @@ function viewMapaMigrantes(container) {
                 <th style="min-width:120px;">Cobertura</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="fem-ciudades-tbody">
               ${ciudadesData.map(c=>`
                 <tr>
                   <td><strong>${c.label}</strong></td>
@@ -3348,12 +3367,8 @@ function viewMapaMigrantes(container) {
 
 // Navega al mapa de rutas con un NNA pre-seleccionado
 function verRutaNNA(id) {
-  const _m = (AppState.migrantes || []).find(x => x.id === id);
-  if (_m) {
-    AppState.mapPreSelectNNA = encodeURIComponent(_m.nombres + '||' + _m.apellidos);
-  } else {
-    AppState.mapPreSelectNNA = id;
-  }
+  // El selector de NNA del mapa se keya por id de migrante
+  AppState.mapPreSelectNNA = id;
   // Intentar navegar al mapa de migrantes (módulo Migrante o Consulta)
   const route = window.location.hash || '';
   if (route.includes('/consulta/')) {
@@ -3603,43 +3618,76 @@ function _buildNNAOptions(ciudadF, migrantes) {
   const _orgCiudad = {};
   AppState.organizaciones.forEach(o => { _orgCiudad[o.id] = o.ciudadId; });
 
-  // Función que decide si un registro de migrante "pasa" por la ciudad
+  // El NNA "pasa por" la ciudad SOLO si algún paso de su RUTA está en ella.
+  // (No se considera la org de registro ni la ciudad de entrevista: el filtro
+  //  es estrictamente sobre la trayectoria real, no sobre dónde se registró.)
   function _pasaPorCiudad(m) {
-    // 1. Algún paso de la ruta tiene esa ciudad directamente
-    if ((m.ruta || []).some(p =>
-      p.ciudadId === ciudadF || _orgCiudad[p.orgId] === ciudadF
-    )) return true;
-    // 2. La entrevista fue en esa ciudad
-    if ((m.ciudadEntrevistaId || m.ciudad_entrevista_id) === ciudadF) return true;
-    // 3. La org del registro pertenece a esa ciudad
-    const orgId = m.orgId || m.orgActualId;
-    if (orgId && _orgCiudad[orgId] === ciudadF) return true;
-    return false;
+    return (m.ruta || []).some(p => p.ciudadId === ciudadF);
   }
 
   // Si hay filtro de ciudad, reducir la lista
   const lista = ciudadF ? migrantes.filter(_pasaPorCiudad) : migrantes;
 
-  // Agrupar por persona (nombres + apellidos)
-  const grupos = {};
-  lista.forEach(m => {
-    const k = m.nombres + '||' + m.apellidos;
-    if (!grupos[k]) grupos[k] = [];
-    grupos[k].push(m);
-  });
-
-  return Object.entries(grupos)
-    .sort(([,a],[,b]) => {
-      const la = a[0].apellidos + ' ' + a[0].nombres;
-      const lb = b[0].apellidos + ' ' + b[0].nombres;
+  // Cada migrante = un NNA con su propia ruta completa. Se keya por id.
+  // (NO se agrupa por nombre: hay nombres repetidos que son personas distintas.)
+  return lista.slice()
+    .sort((a, b) => {
+      const la = (a.ninoApellidos||a.apellidos||'') + ' ' + (a.ninoNombres||a.nombres||'');
+      const lb = (b.ninoApellidos||b.apellidos||'') + ' ' + (b.ninoNombres||b.nombres||'');
       return la < lb ? -1 : la > lb ? 1 : 0;
     })
-    .map(([k, grupo]) => {
-      const m = grupo[0];
-      const totalPuntos = grupo.reduce((s, r) => s + (r.ruta||[]).length, 0);
-      const etiqueta = totalPuntos > 1 ? ` · ${totalPuntos} puntos de ruta` : ' · 1 punto';
-      return `<option value="${encodeURIComponent(k)}">${m.apellidos}, ${m.nombres}${etiqueta}</option>`;
+    .map(m => {
+      const nom = m.ninoNombres || m.nombres || '';
+      const ape = m.ninoApellidos || m.apellidos || '';
+      const pts = (m.ruta || []).length;
+      const etiqueta = pts > 1 ? ` · ${pts} puntos de ruta` : ' · 1 punto';
+      return `<option value="${escapeHtml(m.id)}">${escapeHtml(ape)}, ${escapeHtml(nom)}${etiqueta}</option>`;
     }).join('');
+}
+
+// Reconstruye la tabla "Distribución por Ciudad — Red FEM" según el filtro activo.
+// allowedIds = array de ciudadId a mostrar; null/[] => todas.
+function renderTablaCiudadesFEM(allowedIds) {
+  const tbody = document.getElementById('fem-ciudades-tbody');
+  if (!tbody) return;
+  const ms   = AppState.mockStats;
+  const all  = ms.distribucionCiudadesFEM || [];
+  const data = (allowedIds && allowedIds.length)
+    ? all.filter(c => allowedIds.includes(c.ciudadId))
+    : all;
+
+  const rows = data.map(c => `
+    <tr>
+      <td><strong>${escapeHtml(c.label)}</strong></td>
+      <td><span class="badge badge-gray">${escapeHtml(c.paisLabel||'')}</span></td>
+      <td style="text-align:right;font-weight:700;color:#002F6C;">${(c.nnaUnicos||0).toLocaleString('es')}</td>
+      <td style="text-align:right;color:#003B8F;font-weight:600;">${(c.atenciones||0).toLocaleString('es')}</td>
+      <td style="text-align:right;color:#7C3AED;">${(c.multiPunto||0).toLocaleString('es')}</td>
+      <td style="text-align:right;font-weight:700;">${c.pct||0}%</td>
+      <td>
+        <div style="background:#F1F5F9;border-radius:20px;height:6px;overflow:hidden;">
+          <div style="background:#003B8F;height:100%;width:${(c.pct||0)*5}%;border-radius:20px;max-width:100%;"></div>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  const totNNA  = data.reduce((s,c)=>s+(c.nnaUnicos||0),0);
+  const totAt   = data.reduce((s,c)=>s+(c.atenciones||0),0);
+  const totMult = data.reduce((s,c)=>s+(c.multiPunto||0),0);
+  const filtrado = !!(allowedIds && allowedIds.length);
+  const totalRow = data.length ? `
+    <tr style="background:#F8FAFC;">
+      <td colspan="2"><strong>${filtrado ? 'TOTAL FILTRADO' : 'TOTAL RED FEM'}</strong></td>
+      <td style="text-align:right;font-weight:800;color:#002F6C;">${totNNA.toLocaleString('es')}</td>
+      <td style="text-align:right;font-weight:800;color:#003B8F;">${totAt.toLocaleString('es')}</td>
+      <td style="text-align:right;font-weight:800;color:#7C3AED;">${totMult.toLocaleString('es')}</td>
+      <td style="text-align:right;font-weight:800;">${filtrado ? '' : '100%'}</td>
+      <td></td>
+    </tr>` : '';
+
+  tbody.innerHTML = data.length
+    ? rows + totalRow
+    : `<tr><td colspan="7" style="text-align:center;color:#94A3B8;padding:18px;font-style:italic;">Ninguna ciudad de la red FEM coincide con este filtro.</td></tr>`;
 }
 
 function renderRutasMapa() {
@@ -3669,6 +3717,9 @@ function renderRutasMapa() {
     _nnaSelect.value = _sigueValido ? _prevNna : '';
   }
   const nnaF = (_nnaSelect || {}).value || '';
+
+  // Ciudades por las que pasa el NNA seleccionado (para filtrar la tabla FEM)
+  let _rutaCityIds = [];
 
   // Helper: añadir capa registrada
   function addLayer(key, layer) {
@@ -3783,31 +3834,21 @@ function renderRutasMapa() {
 
   // ── 3. Ruta individual de un NNA ──
   if (nnaF) {
-    // nnaF es una clave de persona codificada: encodeURIComponent("nombres||apellidos")
-    const _decoded   = decodeURIComponent(nnaF);
-    const _sepIdx    = _decoded.indexOf('||');
-    const _pNombres  = _decoded.substring(0, _sepIdx);
-    const _pApellidos = _decoded.substring(_sepIdx + 2);
-
-    // Reunir todos los registros DB de esta persona y ordenarlos por fecha de entrevista ASC
-    // (el más antiguo = primer punto de ruta; el más reciente = segundo punto)
-    const grupoPersona = migrantes
-      .filter(x => x.nombres === _pNombres && x.apellidos === _pApellidos)
-      .sort((a, b) => {
-        const fa = a.ruta && a.ruta[0] ? a.ruta[0].fecha : '';
-        const fb = b.ruta && b.ruta[0] ? b.ruta[0].fecha : '';
-        return fa < fb ? -1 : fa > fb ? 1 : 0;
-      });
+    // nnaF = id del migrante. Cada migrante es UN NNA con su ruta completa.
+    const persona = migrantes.find(x => x.id === nnaF);
+    const grupoPersona = persona ? [persona] : [];
 
     if (grupoPersona.length > 0) {
-      const personaUlt = grupoPersona[grupoPersona.length - 1];
+      const personaUlt = persona;
 
-      // Pasos: 1 paso por registro (el único punto de ruta de cada registro DB), en orden cronológico
-      // → Punto 1 = ciudad de la entrevista más antigua
-      // → Punto 2 = ciudad de la entrevista más reciente
-      const pasos = grupoPersona.map(reg => reg.ruta && reg.ruta[0] ? reg.ruta[0] : null).filter(Boolean);
+      // Pasos = TODAS las paradas de la ruta del NNA, en orden cronológico real
+      const pasos = (persona.ruta || []).slice().sort((a, b) =>
+        (a.fecha||'') < (b.fecha||'') ? -1 : (a.fecha||'') > (b.fecha||'') ? 1 : 0);
 
-      // Destino proyectado: del registro más reciente (última entrevista)
+      // Registrar las ciudades de la ruta para filtrar la tabla de ciudades FEM
+      _rutaCityIds = [...new Set(pasos.map(p => p.ciudadId).filter(Boolean))];
+
+      // Destino proyectado: declarado en el registro
       const _destinoFinalId = personaUlt.destinoFinalPaisId;
 
       // Mapeo org → ciudad real (actualizado con el esquema de datos actual)
@@ -3882,8 +3923,8 @@ function renderRutasMapa() {
           var lugLabel = _pasoLabel(paso, 'Punto ' + (idx+1));
           var isFirst  = idx === 0;
           var isLast   = idx === puntos.length - 1;
-          var color    = isFirst ? '#17A65A' : '#DC2626';
-          var titulo   = isFirst ? '🟢 1ª entrevista' : '🔴 2ª entrevista';
+          var color    = isFirst ? '#17A65A' : (isLast ? '#DC2626' : '#003B8F');
+          var titulo   = isFirst ? '🟢 Origen' : (isLast ? '🔴 Última parada' : '🔵 Parada ' + (idx + 1));
           var dot = L.circleMarker(pt, {
             radius: 10, fillColor: color, color: '#fff', weight: 2, fillOpacity: 1,
           });
@@ -3974,14 +4015,11 @@ function renderRutasMapa() {
   const badge = document.getElementById('ruta-conteo-badge');
   if (badge) {
     if (nnaF) {
-      const _dec = decodeURIComponent(nnaF);
-      const _sep = _dec.indexOf('||');
-      const _pNom = _sep >= 0 ? _dec.substring(0, _sep) : _dec;
-      const _pApe = _sep >= 0 ? _dec.substring(_sep + 2) : '';
-      const _grp = migrantes.filter(x => x.nombres === _pNom && x.apellidos === _pApe);
-      const _totalPts = _grp.reduce((s, r) => s + (r.ruta || []).length, 0) || 1;
-      const _nombre = _pNom + ' ' + _pApe;
-      badge.innerHTML = `Mostrando ruta de <strong style="color:#DC2626;">${_nombre.trim()}</strong> · ${_totalPts} punto${_totalPts !== 1 ? 's' : ''} de atención registrado${_totalPts !== 1 ? 's' : ''}`;
+      const _p = migrantes.find(x => x.id === nnaF);
+      const _nombre = _p ? `${_p.ninoNombres || _p.nombres || ''} ${_p.ninoApellidos || _p.apellidos || ''}` : '';
+      const _totalPts = _p ? (_p.ruta || []).length || 1 : 1;
+      const _ciudadesRuta = _p ? [...new Set((_p.ruta||[]).map(s => _MAP_LABELS[s.ciudadId] || s.ciudadId).filter(Boolean))].join(' → ') : '';
+      badge.innerHTML = `Ruta de <strong style="color:#DC2626;">${escapeHtml(_nombre.trim())}</strong> · ${_totalPts} parada${_totalPts !== 1 ? 's' : ''}${_ciudadesRuta ? ` · ${escapeHtml(_ciudadesRuta)}` : ''}`;
     } else if (ciudadF) {
       const c = ciudadesData.find(x => x.ciudadId === ciudadF);
       if (c) badge.innerHTML = `Ciudad seleccionada: <strong style="color:#002F6C;">${c.label}</strong> · <strong>${c.nnaUnicos.toLocaleString('es')}</strong> NNA únicos · <strong>${c.atenciones.toLocaleString('es')}</strong> atenciones`;
@@ -3990,6 +4028,10 @@ function renderRutasMapa() {
       badge.innerHTML = `Red completa FEM · <strong style="color:#002F6C;">${total.toLocaleString('es')}</strong> NNA únicos en <strong>${ciudadesData.length || 8}</strong> ciudades`;
     }
   }
+
+  // ── 6. Filtro cruzado de la tabla de ciudades FEM ──
+  // NNA seleccionado → solo las ciudades de su ruta; ciudad seleccionada → solo esa.
+  renderTablaCiudadesFEM(nnaF ? _rutaCityIds : (ciudadF ? [ciudadF] : null));
 }
 
 function limpiarFiltrosRutas() {
@@ -4069,14 +4111,14 @@ function viewSeguridad(container, seccion) {
               return `<div style="border:1px solid #E2E8F0;border-radius:10px;padding:14px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
                   <div style="width:34px;height:34px;border-radius:50%;background:#003B8F;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">
-                    ${((u.nombres[0]||'')+(u.apellidos[0]||'')).toUpperCase()||'?'}
+                    ${escapeHtml(((u.nombres[0]||'')+(u.apellidos[0]||'')).toUpperCase()||'?')}
                   </div>
                   <div>
-                    <div style="font-weight:700;font-size:13px;color:#002F6C;">${u.nombres} ${u.apellidos}</div>
+                    <div style="font-weight:700;font-size:13px;color:#002F6C;">${escapeHtml(u.nombres)} ${escapeHtml(u.apellidos)}</div>
                     <div style="font-size:11px;color:#4B5563;">${u.rol}</div>
                   </div>
                 </div>
-                <div style="font-size:11px;color:#94A3B8;margin-bottom:8px;font-family:monospace;word-break:break-all;">${u.email}</div>
+                <div style="font-size:11px;color:#94A3B8;margin-bottom:8px;font-family:monospace;word-break:break-all;">${escapeHtml(u.email)}</div>
                 <div style="display:flex;flex-wrap:wrap;gap:4px;">
                   ${perms.map(p=>`<span style="background:#ECF2FA;color:#003B8F;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;">${p}</span>`).join('')}
                   ${u.esGlobal?'<span style="background:#FEF3C7;color:#B45309;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;">global</span>':''}
@@ -4183,11 +4225,11 @@ function viewUsuarios(container) {
           <td>
             <div style="display:flex;align-items:center;gap:10px;">
               <div class="avatar avatar-sm" style="background:linear-gradient(135deg,${rolColor}22,${rolColor}44);color:${rolColor};font-weight:800;font-size:12px;">
-                ${(u.nombres[0]||'') + (u.apellidos[0]||'')}
+                ${escapeHtml((u.nombres[0]||'') + (u.apellidos[0]||''))}
               </div>
               <div>
-                <div style="font-weight:700;color:#002F6C;font-size:13px;">${u.nombres} ${u.apellidos}</div>
-                <div style="font-size:11px;color:#4B5563;">${u.email || '—'}</div>
+                <div style="font-weight:700;color:#002F6C;font-size:13px;">${escapeHtml(u.nombres)} ${escapeHtml(u.apellidos)}</div>
+                <div style="font-size:11px;color:#4B5563;">${escapeHtml(u.email || '—')}</div>
               </div>
             </div>
           </td>
@@ -4225,7 +4267,7 @@ function viewUsuarios(container) {
         <div style="padding:16px 20px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:12px;">
           <div style="font-size:12px;font-weight:600;color:#475569;">Simular acceso como:</div>
           <select id="sel-simular-usuario" class="form-control" style="width:auto;min-width:220px;font-size:13px;" onchange="simularAccesoUsuario(this.value)">
-            ${usuarios.map(u => `<option value="${u.id}" ${AppState.currentUser?.id === u.id ? 'selected' : ''}>${u.nombres} ${u.apellidos} (${u.rol})</option>`).join('')}
+            ${usuarios.map(u => `<option value="${u.id}" ${AppState.currentUser?.id === u.id ? 'selected' : ''}>${escapeHtml(u.nombres)} ${escapeHtml(u.apellidos)} (${escapeHtml(u.rol)})</option>`).join('')}
           </select>
           <button class="btn btn-secondary btn-sm" onclick="simularAccesoUsuario(document.getElementById('sel-simular-usuario').value)">Aplicar</button>
           <div id="sim-user-badge" style="font-size:12px;color:#003B8F;"></div>
@@ -4258,14 +4300,14 @@ function viewUsuarioForm(container, params = {}) {
         <input type="checkbox" name="orgAcceso" value="${o.id}" style="accent-color:#003B8F;"
           ${u && u.orgIds && u.orgIds.includes(o.id) ? 'checked' : ''}>
         <span style="font-size:11px;color:#94A3B8;margin-right:2px;">${AppState.catalogos.paises.find(p=>p.id===o.paisId)?.bandera||''}</span>
-        ${o.nombre}
+        ${escapeHtml(o.nombre)}
       </label>`).join('');
 
     container.innerHTML = `
       <div class="page-header">
         <div>
           <h1 class="page-title">${u ? 'Editar Usuario' : 'Nuevo Usuario'}</h1>
-          <p class="page-subtitle">${u ? `Editando a ${u.nombres} ${u.apellidos}` : 'Crear cuenta e invitar por correo'}</p>
+          <p class="page-subtitle">${u ? `Editando a ${escapeHtml(u.nombres)} ${escapeHtml(u.apellidos)}` : 'Crear cuenta e invitar por correo'}</p>
         </div>
       </div>
       <div class="card" style="max-width:680px;">
@@ -4274,16 +4316,16 @@ function viewUsuarioForm(container, params = {}) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
           <div class="form-group">
             <label class="form-label">Nombres *</label>
-            <input type="text" id="usr-nombres" class="form-control" value="${u?.nombres||''}">
+            <input type="text" id="usr-nombres" class="form-control" value="${escapeHtml(u?.nombres||'')}">
           </div>
           <div class="form-group">
             <label class="form-label">Apellidos *</label>
-            <input type="text" id="usr-apellidos" class="form-control" value="${u?.apellidos||''}">
+            <input type="text" id="usr-apellidos" class="form-control" value="${escapeHtml(u?.apellidos||'')}">
           </div>
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label class="form-label">Correo electrónico * <span style="font-size:11px;color:#4B5563;">(se enviará la invitación aquí)</span></label>
-          <input type="email" id="usr-email" class="form-control" value="${u?.email||''}">
+          <input type="email" id="usr-email" class="form-control" value="${escapeHtml(u?.email||'')}">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
           <div class="form-group">
@@ -4297,7 +4339,7 @@ function viewUsuarioForm(container, params = {}) {
             <label class="form-label">Organización principal</label>
             <select id="usr-org-principal" class="form-control">
               <option value="">— Sin org principal —</option>
-              ${orgs.map(o=>`<option value="${o.id}" ${u?.orgId===o.id?'selected':''}>${o.nombre}</option>`).join('')}
+              ${orgs.map(o=>`<option value="${o.id}" ${u?.orgId===o.id?'selected':''}>${escapeHtml(o.nombre)}</option>`).join('')}
             </select>
           </div>
         </div>
@@ -4658,7 +4700,7 @@ function renderBannerFiltroOrg() {
   banner.innerHTML = `
     <div style="background:#ECF2FA;border:1px solid #B8CDEB;border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#1E40AF;">
       <span>🏢</span>
-      <span>Viendo datos de: <strong>${label}</strong> — como <strong>${cu.nombres} ${cu.apellidos} (${cu.rol})</strong></span>
+      <span>Viendo datos de: <strong>${escapeHtml(label)}</strong> — como <strong>${escapeHtml(cu.nombres)} ${escapeHtml(cu.apellidos)} (${escapeHtml(cu.rol)})</strong></span>
       <button onclick="simularAccesoUsuario('USR00')" style="margin-left:auto;background:none;border:1px solid #B8CDEB;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;color:#003B8F;font-weight:600;">Ver todo</button>
     </div>`;
   const mainContent = document.getElementById('main-content');
@@ -4699,15 +4741,15 @@ function viewMiPerfil(container) {
           <div class="form-section-title fst-migrante">Información personal</div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Nombres</label>
-            <input type="text" id="perfil-nombres" class="form-control" value="${u.nombres}">
+            <input type="text" id="perfil-nombres" class="form-control" value="${escapeHtml(u.nombres)}">
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Apellidos</label>
-            <input type="text" id="perfil-apellidos" class="form-control" value="${u.apellidos}">
+            <input type="text" id="perfil-apellidos" class="form-control" value="${escapeHtml(u.apellidos)}">
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Correo electrónico</label>
-            <input type="email" class="form-control" value="${u.email||''}" readonly style="background:#F8FAFC;color:#4B5563;">
+            <input type="email" class="form-control" value="${escapeHtml(u.email||'')}" readonly style="background:#F8FAFC;color:#4B5563;">
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Rol / Cargo</label>
@@ -4732,7 +4774,7 @@ function viewMiPerfil(container) {
             ${orgPrincipal ? `
             <div style="margin-bottom:14px;">
               <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Organización principal</div>
-              <div style="font-size:13px;font-weight:600;color:#002F6C;">${orgPrincipal.nombre}</div>
+              <div style="font-size:13px;font-weight:600;color:#002F6C;">${escapeHtml(orgPrincipal.nombre)}</div>
             </div>` : ''}
             <div>
               <div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Organizaciones visibles</div>

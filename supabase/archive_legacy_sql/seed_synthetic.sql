@@ -14,6 +14,7 @@ INSERT INTO public.migrantes (
   adulto_nexo_id, generacion_ingresos_id,
   adulto_razon_emigracion_id,
   procedencia_pais_id, destino_final_pais_id,
+  pais_entrevista_id, ciudad_entrevista_id,
   org_id,
   adulto_email, adulto_telefono,
   nino_fecha_nacimiento, fecha_registro,
@@ -98,18 +99,46 @@ SELECT
     ELSE 'HN'
   END,
 
-  -- País destino: 41%US 22%MX 15%CO 9%CR 8%PA 5%GT
+  -- País destino: 80%US 10%MX 5%PA 5%CR
   CASE
-    WHEN (gs % 100) < 41 THEN 'US'
-    WHEN (gs % 100) < 63 THEN 'MX'
-    WHEN (gs % 100) < 78 THEN 'CO'
-    WHEN (gs % 100) < 87 THEN 'CR'
+    WHEN (gs % 100) < 80 THEN 'US'
+    WHEN (gs % 100) < 90 THEN 'MX'
     WHEN (gs % 100) < 95 THEN 'PA'
-    ELSE 'GT'
+    ELSE                      'CR'
   END,
 
-  -- Organización (distribuida entre las 11)
-  'ORG' || LPAD(((gs % 11) + 1)::text, 2, '0'),
+  -- País de entrevista (Oficina FEM que registró al NNA)
+  -- Cúcuta=CO 20% | Caracas=VE 18% | Bogotá=CO 14% | Medellín=CO 11%
+  -- Cali=CO 10% | Barranquilla=CO 10% | Cartagena=CO 9% | Santa Marta=CO 8%
+  CASE
+    WHEN (gs % 100) < 20 THEN 'CO'  -- Cúcuta
+    WHEN (gs % 100) < 38 THEN 'VE'  -- Caracas
+    ELSE                      'CO'  -- resto Colombia
+  END,
+
+  -- Ciudad de entrevista (Oficina FEM)
+  CASE
+    WHEN (gs % 100) < 20 THEN 'CUC'
+    WHEN (gs % 100) < 38 THEN 'CCS'
+    WHEN (gs % 100) < 52 THEN 'BOG'
+    WHEN (gs % 100) < 63 THEN 'MED'
+    WHEN (gs % 100) < 73 THEN 'CAL'
+    WHEN (gs % 100) < 83 THEN 'BAR'
+    WHEN (gs % 100) < 92 THEN 'CTG'
+    ELSE                      'SMA'
+  END,
+
+  -- Organización FEM de la entrevista
+  CASE
+    WHEN (gs % 100) < 20 THEN 'ORG12'  -- Cúcuta
+    WHEN (gs % 100) < 38 THEN 'ORG11'  -- Caracas
+    WHEN (gs % 100) < 52 THEN 'ORG13'  -- Bogotá
+    WHEN (gs % 100) < 63 THEN 'ORG14'  -- Medellín
+    WHEN (gs % 100) < 73 THEN 'ORG15'  -- Cali
+    WHEN (gs % 100) < 83 THEN 'ORG16'  -- Barranquilla
+    WHEN (gs % 100) < 92 THEN 'ORG17'  -- Cartagena
+    ELSE                      'ORG18'  -- Santa Marta
+  END,
 
   -- Email: NULL para gs<=387 → esos son los "pendientes"
   -- (387 sintéticos + 4 existentes = 391 total pendientes)
