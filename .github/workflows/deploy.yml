@@ -1,33 +1,73 @@
-name: Deploy a Hostinger
+name: CI/CD — Pruebas + Deploy a Hostinger
 
-# Despliega el sitio estático a Hostinger en cada push a main.
-# Requiere 4 secrets en el repo (Settings -> Secrets and variables -> Actions):
-#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR
-# Ver docs/ci-cd.md para cómo obtenerlos.
+# En cada push a main: primero corre las pruebas (RLS, funciones, edge, integridad).
+# Solo si pasan, despliega el sitio estático a Hostinger.
+#
+# Secrets requeridos (Settings -> Secrets and variables -> Actions):
+#   Pruebas:  SUPABASE_SERVICE_ROLE_KEY
+#   Deploy:   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR
+# Ver docs/ci-cd.md.
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:   # permite lanzarlo manualmente desde la pestaña Actions
+  workflow_dispatch:
 
 concurrency:
-  group: deploy-hostinger
+  group: cicd-main
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: Build estático + FTP deploy
+  # ─────────────────────────────────────────────────────────────
+  test:
+    name: Pruebas (RLS · funciones · edge · integridad)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validar sintaxis de JS (frena deploys rotos)
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validar sintaxis de JS
         run: |
           node --check app.js
           node --check supabase-data.js
           node --check mockData.js
           node --check supabase-config.js
+
+      - name: Instalar dependencias de pruebas
+        working-directory: tests
+        run: npm install --no-audit --no-fund
+
+      - name: Ejecutar pruebas
+        working-directory: tests
+        env:
+          # Públicos (no sensibles)
+          SUPABASE_URL: https://izcqcnunryhntojhxywu.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable__LIveg146Avk4WSUp3WjWA_G55IhbYa
+          # Secreto del repositorio
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Fixtures de prueba (no sensibles)
+          TEST_ADMIN_EMAIL: test-admin@viamovimiento.test
+          TEST_ADMIN_PASSWORD: Test-Admin-2026!
+          TEST_OPERATOR_EMAIL: test-operator@viamovimiento.test
+          TEST_OPERATOR_PASSWORD: Test-Operator-2026!
+          TEST_OPERATOR_ORG: ORG12
+          # Las pruebas que ESCRIBEN se mantienen apagadas (solo lectura contra prod).
+          TEST_ALLOW_WRITES: 'false'
+        run: npm test
+
+  # ─────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy estático a Hostinger
+    needs: [ test ]          # ← gate: solo despliega si las pruebas pasan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Preparar artefactos estáticos (solo archivos web)
         run: |
@@ -44,8 +84,5 @@ jobs:
           password:    ${{ secrets.FTP_PASSWORD }}
           server-dir:  ${{ secrets.FTP_SERVER_DIR }}
           local-dir:   ./dist/
-          protocol:    ftps          # FTP sobre TLS (recomendado por Hostinger)
-          # Si FTPS falla, cambia a:  protocol: ftp
-          # dangerous-clean-slate: borra en el servidor lo que no esté en dist.
-          # Se deja en false: solo sube cambios.
+          protocol:    ftps          # si tu cuenta no tiene FTPS, cambia a: ftp
           dangerous-clean-slate: false

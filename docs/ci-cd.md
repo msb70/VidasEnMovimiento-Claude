@@ -5,10 +5,23 @@ mediante GitHub Actions (workflow `.github/workflows/deploy.yml`).
 
 ## Cómo funciona
 
-1. El workflow copia solo los archivos web a una carpeta `dist/`
+El pipeline tiene **dos jobs** y el deploy depende del primero:
+
+1. **`test`** — valida sintaxis de JS y corre la suite de pruebas
+   (`tests/`: RLS, funciones, Edge Function, integridad). Si algo falla, **no se despliega**.
+2. **`deploy`** (`needs: [test]`) — copia solo los archivos web a `dist/`
    (`index.html`, `app.js`, `styles.css`, `mockData.js`, `supabase-config.js`,
-   `supabase-data.js`, `assets/`). No sube `supabase/`, `docs/`, ni archivos internos.
-2. Sube `dist/` por **FTPS** a la carpeta pública del dominio en Hostinger.
+   `supabase-data.js`, `assets/`) y los sube por **FTPS** a Hostinger.
+
+> Las pruebas corren contra la base real en **modo solo lectura** (`TEST_ALLOW_WRITES=false`);
+> no modifican datos, solo garantizan 2 usuarios de prueba. Para las pruebas que escriben,
+> usar un branch de Supabase.
+
+### Secret adicional para las pruebas
+
+| Secret | Valor |
+|---|---|
+| `SUPABASE_SERVICE_ROLE_KEY` | Dashboard → Project Settings → API → `service_role` (secreto). Solo lo usa el setup de las pruebas. |
 
 ## Configuración (una sola vez)
 
