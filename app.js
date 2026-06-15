@@ -256,22 +256,7 @@ function serviciosBadges(ids) {
   }).join('');
 }
 
-// ─── SEGURIDAD: escape de HTML para datos dinámicos (anti-XSS) ──
-// Escapa los 5 caracteres peligrosos. Seguro tanto en contenido de
-// elementos como dentro de atributos entre comillas dobles.
-function escapeHtml(value) {
-  if (value === null || value === undefined) return '';
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function avatarIniciales(nombre) {
-  return escapeHtml((nombre || '').split(' ').slice(0,2).map(p => p[0] || '').join('').toUpperCase());
-}
+// escapeHtml() y avatarIniciales() viven en lib.js (cargado antes que app.js).
 
 function avatarColor(id) {
   const colors = ['accent','blue','green','purple'];
@@ -3377,15 +3362,7 @@ function verRutaNNA(id) {
   }
 }
 
-// Edad en años desde fecha ISO
-function calcEdadDesde(f) {
-  if (!f) return null;
-  const h = new Date(), n = new Date(f.substring(0,10) + 'T00:00:00');
-  if (isNaN(n)) return null;
-  let e = h.getFullYear() - n.getFullYear();
-  if (h.getMonth() < n.getMonth() || (h.getMonth() === n.getMonth() && h.getDate() < n.getDate())) e--;
-  return (e >= 0 && e <= 120) ? e : null;
-}
+// calcEdadDesde() vive en lib.js (cargado antes que app.js).
 
 // Tabla de coords por ID de país y ciudad — completamente independiente del catálogo
 const _MAP_COORDS = {
@@ -3621,7 +3598,7 @@ function _buildNNAOptions(ciudadF, migrantes) {
   // (No se considera la org de registro ni la ciudad de entrevista: el filtro
   //  es estrictamente sobre la trayectoria real, no sobre dónde se registró.)
   function _pasaPorCiudad(m) {
-    return (m.ruta || []).some(p => p.ciudadId === ciudadF);
+    return rutaIncluyeCiudad(m.ruta, ciudadF);
   }
 
   // Si hay filtro de ciudad, reducir la lista

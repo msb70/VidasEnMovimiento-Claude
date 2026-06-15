@@ -33,6 +33,7 @@ jobs:
 
       - name: Validar sintaxis de JS
         run: |
+          node --check lib.js
           node --check app.js
           node --check supabase-data.js
           node --check mockData.js
@@ -72,7 +73,7 @@ jobs:
       - name: Preparar artefactos estáticos (solo archivos web)
         run: |
           mkdir -p dist
-          cp index.html app.js styles.css mockData.js supabase-config.js supabase-data.js dist/
+          cp index.html lib.js app.js styles.css mockData.js supabase-config.js supabase-data.js dist/
           cp -r assets dist/
           echo "Contenido a desplegar:" && find dist -type f | sort
 
