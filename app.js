@@ -481,7 +481,7 @@ function viewDashboard(container) {
           <p class="page-subtitle">Plataforma actualizada</p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-secondary btn-sm" onclick="showToast('Reporte exportado','success')">⬇ Exportar</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportarDashboardPDF()">⬇ Exportar PDF</button>
           <button class="btn btn-primary btn-sm" onclick="navigate('/migrante/nuevo')">+ Registrar</button>
         </div>
       </div>
@@ -490,15 +490,15 @@ function viewDashboard(container) {
       <div class="card" style="margin-bottom:20px;padding:14px 20px;">
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
           <span style="font-size:13px;font-weight:600;color:#475569;">Filtros:</span>
-          <select id="db-f-pais" class="form-control" style="width:auto;min-width:150px;" onchange="const sc=document.getElementById('db-f-ciudad');if(sc)sc.value='';const so=document.getElementById('db-f-ong');if(so)so.value='';actualizarDashboard()">
+          <select id="db-f-pais" aria-label="Filtrar por país" class="form-control" style="width:auto;min-width:150px;" onchange="const sc=document.getElementById('db-f-ciudad');if(sc)sc.value='';const so=document.getElementById('db-f-ong');if(so)so.value='';actualizarDashboard()">
             <option value="">Todos los países</option>
             ${AppState.catalogos.paises.filter(p=>p.id==='CO'||p.id==='VE').map(p=>`<option value="${p.id}">${p.bandera} ${p.label}</option>`).join('')}
           </select>
-          <select id="db-f-ciudad" class="form-control" style="width:auto;min-width:160px;" onchange="actualizarDashboard()">
+          <select id="db-f-ciudad" aria-label="Filtrar por ciudad" class="form-control" style="width:auto;min-width:160px;" onchange="actualizarDashboard()">
             <option value="">Todas las ciudades</option>
             ${AppState.catalogos.ciudades.filter(c=>c.paisId==='CO'||c.paisId==='VE').map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}
           </select>
-          <select id="db-f-ong" class="form-control" style="width:auto;min-width:210px;" onchange="actualizarDashboard()">
+          <select id="db-f-ong" aria-label="Filtrar por organización" class="form-control" style="width:auto;min-width:210px;" onchange="actualizarDashboard()">
             <option value="">Todas las ONGs</option>
             ${AppState.organizaciones.map(o=>`<option value="${o.id}">${escapeHtml(o.nombre)}</option>`).join('')}
           </select>
@@ -999,10 +999,10 @@ function viewMigranteListado(container, params = {}) {
           <p class="page-subtitle" id="listado-count">Cargando...</p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-secondary btn-sm" onclick="showModal({titulo:'Agrupación',body:'<p>Agrupa los registros por País, Ciudad u Organización para análisis agrupado.</p><p style=\\'margin-top:8px;font-size:12px;color:#4B5563;\\'>Esta función estará disponible en la versión final.</p>',acciones:['<button class=\\'btn btn-secondary\\' onclick=\\'closeModal()\\'>Cerrar</button>']})">≡ Agrupación</button>
-          <button class="btn btn-secondary btn-sm" onclick="showToast('Exportando listado...','success')">⬇ Exportar</button>
-          <button class="btn btn-secondary btn-sm" onclick="showModal({titulo:'Tipo de Consulta',body:'<p><strong>Básica:</strong> Campos principales del registro.</p><p><strong>Detallada:</strong> Incluye ruta completa y servicios recibidos.</p><p><strong>Estadística:</strong> Resumen agrupado por indicadores.</p>',acciones:['<button class=\\'btn btn-primary\\' onclick=\\'closeModal()\\'>Aplicar</button>']})">🔍 Tipo Consulta</button>
-          <button class="btn btn-secondary btn-sm" onclick="showModal({titulo:'Opciones avanzadas',body:'<p>Columnas visibles, densidad, paginación y otras opciones de visualización.</p>',acciones:['<button class=\\'btn btn-secondary\\' onclick=\\'closeModal()\\'>Cerrar</button>']})">⚙ Opciones</button>
+          <button class="btn btn-secondary btn-sm" onclick="mostrarAgrupacionListado()">≡ Agrupación</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportarListadoExcel()">⬇ Exportar Excel</button>
+          <button class="btn btn-secondary btn-sm" onclick="mostrarTipoConsultaListado()">🔍 Tipo Consulta</button>
+          <button class="btn btn-secondary btn-sm" onclick="mostrarOpcionesListado()">⚙ Opciones</button>
           <button class="btn btn-primary btn-sm" onclick="navigate('/migrante/nuevo')">+ Registrar</button>
         </div>
       </div>
@@ -1197,7 +1197,7 @@ function renderListado() {
         <td style="font-size:12px;color:#4B5563;">${fechaReg}</td>
         <td onclick="event.stopPropagation()">
           <div style="display:flex;gap:4px;justify-content:flex-end;">
-            <button class="btn btn-sm btn-secondary" onclick="navigate('/migrante/detalle/${m.id}')">Ver</button>
+            <button class="btn btn-sm btn-secondary" onclick="navigate('/migrante/detalle', {id:'${m.id}'})">Ver</button>
             <button class="btn btn-sm" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;" title="Ver ruta en el mapa" onclick="verRutaNNA('${m.id}')">🗺 Ruta</button>
             <button class="btn btn-sm" style="background:#ECF2FA;color:#003B8F;" onclick="navigate('/migrante/nuevo',{editId:'${m.id}'})">Editar</button>
           </div>
@@ -4822,6 +4822,161 @@ async function guardarPerfil() {
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '✓ Guardar nombre'; }
   }
+}
+
+// ─── EXPORTACIONES (PDF dashboard / Excel listado) ───────────
+
+// Carga perezosa de una librería por CDN (una sola vez).
+function cargarScriptUnaVez(src) {
+  return new Promise((resolve, reject) => {
+    if ([...document.scripts].some(s => s.src === src)) return resolve();
+    const s = document.createElement('script');
+    s.src = src; s.onload = () => resolve(); s.onerror = () => reject(new Error('No se pudo cargar ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+const _CDN = {
+  jspdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  html2canvas: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+  xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+};
+
+// PDF profesional del dashboard: encabezado de marca + captura fiel paginada.
+async function exportarDashboardPDF() {
+  const cont = document.getElementById('main-content');
+  if (!cont) return;
+  const btn = document.querySelector('[onclick="exportarDashboardPDF()"]');
+  const prev = btn ? btn.textContent : null;
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Generando…'; }
+    showToast('Generando PDF del dashboard…', 'info');
+    await cargarScriptUnaVez(_CDN.html2canvas);
+    await cargarScriptUnaVez(_CDN.jspdf);
+
+    const canvas = await html2canvas(cont, {
+      scale: 2, backgroundColor: '#F4F6FB', useCORS: true, windowWidth: cont.scrollWidth,
+    });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+
+    // Encabezado de marca (página 1)
+    const headH = 24;
+    pdf.setFillColor(0, 47, 108); pdf.rect(0, 0, pageW, headH, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
+    pdf.text('Vidas en Movimiento', 12, 11);
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9.5);
+    pdf.text('Reporte de Dashboard — Plataforma de Seguimiento Migratorio', 12, 18);
+    const fecha = new Date().toLocaleDateString('es', { year: 'numeric', month: 'long', day: 'numeric' });
+    pdf.setFontSize(9); pdf.text(fecha, pageW - 12, 11, { align: 'right' });
+
+    const margin = 8;
+    const imgW = pageW - margin * 2;
+    const imgH = canvas.height * imgW / canvas.width;
+    const topFirst = headH + 6;
+    const pxPerMM = canvas.width / imgW;
+    let remaining = imgH, srcY = 0, first = true, pageNum = 1;
+
+    while (remaining > 0) {
+      const top = first ? topFirst : 10;
+      const usable = (first ? pageH - topFirst : pageH - 10) - 10;
+      const sliceMM = Math.min(usable, remaining);
+      const slicePx = Math.round(sliceMM * pxPerMM);
+      const pc = document.createElement('canvas');
+      pc.width = canvas.width; pc.height = slicePx;
+      pc.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, slicePx, 0, 0, canvas.width, slicePx);
+      if (!first) pdf.addPage();
+      pdf.addImage(pc.toDataURL('image/png'), 'PNG', margin, top, imgW, sliceMM);
+      pdf.setFontSize(8); pdf.setTextColor(150, 150, 150);
+      pdf.text('vidasenmovimiento.com', 12, pageH - 5);
+      pdf.text('Página ' + pageNum, pageW - 12, pageH - 5, { align: 'right' });
+      remaining -= sliceMM; srcY += slicePx; first = false; pageNum++;
+    }
+
+    pdf.save('Dashboard_VidasEnMovimiento_' + new Date().toISOString().slice(0, 10) + '.pdf');
+    showToast('PDF generado correctamente', 'success');
+  } catch (e) {
+    console.error('exportarDashboardPDF', e);
+    showToast('No se pudo generar el PDF', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = prev; }
+  }
+}
+
+// Excel del listado con todos los campos (respeta el alcance del usuario).
+async function exportarListadoExcel() {
+  const lista = getVisibleMigrantes();
+  if (!lista.length) { showToast('No hay registros para exportar', 'warning'); return; }
+  try {
+    showToast('Generando Excel…', 'info');
+    await cargarScriptUnaVez(_CDN.xlsx);
+    const cat = AppState.catalogos || {};
+    const lbl = (arr, id) => (arr || []).find(x => x.id === id)?.label || '';
+    const org = (id) => (AppState.organizaciones || []).find(o => o.id === id)?.nombre || '';
+    const generoTxt = (id) => ({ M: 'Masculino', F: 'Femenino', NB: 'No binario', NE: 'No especificado' }[id] || lbl(cat.generos, id));
+
+    const rows = lista.map(m => ({
+      'ID': m.id,
+      'Niño/a (nombres)': m.ninoNombres || '',
+      'Niño/a (apellidos)': m.ninoApellidos || '',
+      'Género': generoTxt(m.ninoGeneroId),
+      'Fecha nacimiento': (m.fechaNacimiento || m.ninoFechaNacimiento || ''),
+      'Edad': calcEdadDesde(m.fechaNacimiento || m.ninoFechaNacimiento) ?? '',
+      'Nacionalidad': lbl(cat.nacionalidades, m.nacionalidadId),
+      'País procedencia': lbl(cat.paises, m.paisOrigenId || m.procedenciaPaisId),
+      'País destino': lbl(cat.paises, m.destinoFinalPaisId),
+      'Adulto (nombres)': m.adultoNombres || m.nombres || '',
+      'Adulto (apellidos)': m.adultoApellidos || m.apellidos || '',
+      'Email': m.adultoEmail || m.email || '',
+      'Teléfono': m.adultoTelefono || '',
+      'Nexo': lbl(cat.nexos, m.nexoId),
+      'Razón de emigración': lbl(cat.razonesEmigracion, m.adultoRazonId),
+      'Generación de ingresos': lbl(cat.generacionIngresos, m.ingresosId),
+      'Organización de registro': org(m.orgId),
+      'Estado': m.estado || '',
+      'Vulnerabilidad': m.vulnerabilidad || '',
+      'Paradas de ruta': (m.ruta || []).length,
+      'Fecha de registro': m.fechaRegistro || '',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length + 2, 12), 30) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Migrantes');
+    XLSX.writeFile(wb, 'Migrantes_VidasEnMovimiento_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+    showToast('Excel generado (' + rows.length + ' registros)', 'success');
+  } catch (e) {
+    console.error('exportarListadoExcel', e);
+    showToast('No se pudo generar el Excel', 'error');
+  }
+}
+
+// Modales del listado (reemplazan los onclick inline frágiles).
+function mostrarAgrupacionListado() {
+  showModal({
+    titulo: 'Agrupación',
+    body: '<p>Agrupa los registros por País, Ciudad u Organización para un análisis agregado.</p>',
+    acciones: ['<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>'],
+  });
+}
+function mostrarTipoConsultaListado() {
+  showModal({
+    titulo: 'Tipo de Consulta',
+    body: '<p><strong>Básica:</strong> Campos principales del registro.</p>'
+        + '<p><strong>Detallada:</strong> Incluye ruta completa y servicios recibidos.</p>'
+        + '<p><strong>Estadística:</strong> Resumen agrupado por indicadores.</p>',
+    acciones: ['<button class="btn btn-primary" onclick="closeModal()">Entendido</button>'],
+  });
+}
+function mostrarOpcionesListado() {
+  showModal({
+    titulo: 'Opciones de visualización',
+    body: '<p>Columnas visibles, densidad y paginación de la tabla.</p>',
+    acciones: ['<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>'],
+  });
 }
 
 // ─── CONTROLES DEL SHELL (eventos) ───────────────────────────

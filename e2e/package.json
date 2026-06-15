@@ -1,0 +1,16 @@
+{
+  "name": "vidas-en-movimiento-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fase 3 — E2E (Playwright) + accesibilidad (axe-core)",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.48.0",
+    "dotenv": "^16.4.5"
+  }
+}

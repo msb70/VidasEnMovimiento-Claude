@@ -36,3 +36,10 @@ zi*
 # Tests
 tests/node_modules/
 tests/.env
+
+# E2E (Playwright)
+e2e/node_modules/
+e2e/.env
+e2e/playwright-report/
+e2e/test-results/
+e2e/.last-run.json
