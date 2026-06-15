@@ -32,3 +32,7 @@ ziSOz5K6
 *.docx
 ziRefpRH
 zi*
+
+# Tests
+tests/node_modules/
+tests/.env

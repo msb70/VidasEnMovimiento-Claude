@@ -1,0 +1,16 @@
+{
+  "name": "vidas-en-movimiento-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fase 1 — Pruebas de RLS, funciones, Edge Function e integridad de datos",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "vitest": "^2.1.0"
+  }
+}

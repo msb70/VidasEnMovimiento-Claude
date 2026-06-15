@@ -493,7 +493,7 @@ function viewDashboard(container) {
       <div class="page-header">
         <div>
           <h1 class="page-title">Dashboard General</h1>
-          <p class="page-subtitle">Corte: Abril 2026 — Plataforma actualizada</p>
+          <p class="page-subtitle">Plataforma actualizada</p>
         </div>
         <div class="page-actions">
           <button class="btn btn-secondary btn-sm" onclick="showToast('Reporte exportado','success')">⬇ Exportar</button>
@@ -613,7 +613,7 @@ function viewDashboard(container) {
         <div class="card-header">
           <div>
             <div class="card-title">Crecimiento y Variación de Registros</div>
-            <div class="card-subtitle">Comparación por período — Corte: Abril 2026</div>
+            <div class="card-subtitle">Comparación por período</div>
           </div>
           <div style="display:flex;gap:8px;">
             <button id="btn-mensual" class="btn btn-sm" style="background:#ECF2FA;color:#003B8F;border:1.5px solid #B8CDEB;font-weight:700;" onclick="cambiarPeriodoCrecimiento('mensual')">Mensual</button>
@@ -3338,7 +3338,6 @@ function viewMapaMigrantes(container) {
         </div>
         <div style="padding:12px 16px;background:#ECF2FA;border-top:1px solid #D9E5F5;display:flex;gap:24px;flex-wrap:wrap;">
           <div style="font-size:12px;color:#002F6C;"><strong>100%</strong> de los NNA registrados son atendidos por oficinas de la Fundación Mendoza (FEM)</div>
-          <div style="font-size:12px;color:#4B5563;">Supuesto conservador: 40% con 1 punto · 60% con 2 puntos de atención</div>
         </div>
       </div>
     `;
