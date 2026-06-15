@@ -521,7 +521,7 @@ function viewDashboard(container) {
           <div class="kpi-body">
             <div class="kpi-label">Niños (M)</div>
             <div class="kpi-value" id="kpi-ninos">${ninos.toLocaleString('es')}</div>
-            <div class="kpi-sub" id="kpi-ninos-pct"><span style="background:#D9E5F5;color:#002F6C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNinos}%</span></div>
+            <div class="kpi-sub" id="kpi-ninos-pct"><span style="display:inline-block;margin-top:5px;background:#D9E5F5;color:#002F6C;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.3;">${pctNinos}%</span></div>
           </div>
           <div class="kpi-icon blue">♂</div>
         </div>
@@ -529,7 +529,7 @@ function viewDashboard(container) {
           <div class="kpi-body">
             <div class="kpi-label">Niñas (F)</div>
             <div class="kpi-value" id="kpi-ninas">${ninas.toLocaleString('es')}</div>
-            <div class="kpi-sub" id="kpi-ninas-pct"><span style="background:#FCE7F3;color:#BE185D;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNinas}%</span></div>
+            <div class="kpi-sub" id="kpi-ninas-pct"><span style="display:inline-block;margin-top:5px;background:#FCE7F3;color:#BE185D;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.3;">${pctNinas}%</span></div>
           </div>
           <div class="kpi-icon purple">♀</div>
         </div>
@@ -913,9 +913,9 @@ function actualizarDashboard() {
 
   // Actualizar badges de porcentaje
   const badgeNi = document.getElementById('kpi-ninos-pct');
-  if (badgeNi) badgeNi.innerHTML = `<span style="background:#D9E5F5;color:#002F6C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNi}%</span>`;
+  if (badgeNi) badgeNi.innerHTML = `<span style="display:inline-block;margin-top:5px;background:#D9E5F5;color:#002F6C;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.3;">${pctNi}%</span>`;
   const badgeNa = document.getElementById('kpi-ninas-pct');
-  if (badgeNa) badgeNa.innerHTML = `<span style="background:#FCE7F3;color:#BE185D;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;">${pctNa}%</span>`;
+  if (badgeNa) badgeNa.innerHTML = `<span style="display:inline-block;margin-top:5px;background:#FCE7F3;color:#BE185D;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.3;">${pctNa}%</span>`;
 
   // Tag de filtro activo
   const tag = document.getElementById('db-filtro-tag');
@@ -999,10 +999,7 @@ function viewMigranteListado(container, params = {}) {
           <p class="page-subtitle" id="listado-count">Cargando...</p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-secondary btn-sm" onclick="mostrarAgrupacionListado()">≡ Agrupación</button>
           <button class="btn btn-secondary btn-sm" onclick="exportarListadoExcel()">⬇ Exportar Excel</button>
-          <button class="btn btn-secondary btn-sm" onclick="mostrarTipoConsultaListado()">🔍 Tipo Consulta</button>
-          <button class="btn btn-secondary btn-sm" onclick="mostrarOpcionesListado()">⚙ Opciones</button>
           <button class="btn btn-primary btn-sm" onclick="navigate('/migrante/nuevo')">+ Registrar</button>
         </div>
       </div>
@@ -1338,7 +1335,7 @@ function viewMigranteDetalle(container, params = {}) {
           <p class="page-subtitle">${m.id} · Registrado el ${Helpers.formatFecha(m.fechaRegistro || m.fecha_registro)}</p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-secondary btn-sm" onclick="showToast('Ficha exportada en PDF','success')">⬇ Exportar ficha</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportarFichaMigrantePDF('${id}')">⬇ Exportar ficha</button>
           <button class="btn btn-primary btn-sm" onclick="abrirFormEdicion('${m.id}')">✏️ Editar</button>
         </div>
       </div>
@@ -4840,6 +4837,7 @@ const _CDN = {
   jspdf: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   html2canvas: 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
   xlsx: 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  autotable: 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js',
 };
 
 // PDF profesional del dashboard: encabezado de marca + captura fiel paginada.
@@ -4954,29 +4952,132 @@ async function exportarListadoExcel() {
   }
 }
 
-// Modales del listado (reemplazan los onclick inline frágiles).
-function mostrarAgrupacionListado() {
-  showModal({
-    titulo: 'Agrupación',
-    body: '<p>Agrupa los registros por País, Ciudad u Organización para un análisis agregado.</p>',
-    acciones: ['<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>'],
-  });
-}
-function mostrarTipoConsultaListado() {
-  showModal({
-    titulo: 'Tipo de Consulta',
-    body: '<p><strong>Básica:</strong> Campos principales del registro.</p>'
-        + '<p><strong>Detallada:</strong> Incluye ruta completa y servicios recibidos.</p>'
-        + '<p><strong>Estadística:</strong> Resumen agrupado por indicadores.</p>',
-    acciones: ['<button class="btn btn-primary" onclick="closeModal()">Entendido</button>'],
-  });
-}
-function mostrarOpcionesListado() {
-  showModal({
-    titulo: 'Opciones de visualización',
-    body: '<p>Columnas visibles, densidad y paginación de la tabla.</p>',
-    acciones: ['<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>'],
-  });
+// PDF profesional de la ficha individual de un migrante (estructurado).
+async function exportarFichaMigrantePDF(id) {
+  const m = (AppState.migrantes || []).find(x => x.id === id)
+         || (window.DB && DB.migrantes && DB.migrantes.get ? DB.migrantes.get(id) : null);
+  if (!m) { showToast('No se encontró el registro', 'error'); return; }
+  try {
+    showToast('Generando ficha PDF…', 'info');
+    await cargarScriptUnaVez(_CDN.jspdf);
+    await cargarScriptUnaVez(_CDN.autotable);
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const cat = AppState.catalogos || {};
+    const L = (arr, v) => (cat[arr] || []).find(x => x.id === v)?.label || '—';
+    const pais = (v) => L('paises', v);
+    const org = (v) => (AppState.organizaciones || []).find(o => o.id === v)?.nombre || '—';
+    const G = { M: 'Masculino', F: 'Femenino', NB: 'No binario', NE: 'No especificado' };
+    const gen = (v) => G[v] || L('generos', v);
+    const f = (v) => (v === 0 ? '0' : (v || '—'));
+    const fb = (v) => (v === true || v === 'si') ? 'Sí' : (v === false || v === 'no') ? 'No' : '—';
+
+    const ninoNom = m.ninoNombres || m.nino_nombres || '';
+    const ninoApe = m.ninoApellidos || m.nino_apellidos || '';
+    const fnac = m.fechaNacimiento || m.ninoFechaNacimiento || m.nino_fecha_nacimiento;
+    const edad = calcEdadDesde(fnac);
+    const nombre = (ninoNom + ' ' + ninoApe).trim()
+      || ((m.adultoNombres || '') + ' ' + (m.adultoApellidos || '')).trim() || '—';
+
+    // Encabezado de marca
+    doc.setFillColor(0, 47, 108); doc.rect(0, 0, pageW, 26, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.text('Vidas en Movimiento', 12, 12);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.text('Ficha de Migrante — Niñez en movimiento', 12, 19);
+    doc.setFontSize(9);
+    doc.text(new Date().toLocaleDateString('es', { year: 'numeric', month: 'long', day: 'numeric' }), pageW - 12, 12, { align: 'right' });
+    doc.text('ID: ' + m.id, pageW - 12, 19, { align: 'right' });
+
+    let y = 34;
+    doc.setTextColor(0, 47, 108); doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
+    doc.text(nombre, 12, y); y += 6;
+    const estadoTxt = { en_transito: 'En tránsito', atendido: 'Atendido', derivado: 'Derivado', ubicado: 'Ubicado' }[m.estado] || m.estado || '—';
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 90, 90);
+    doc.text('Estado: ' + estadoTxt + '     ·     Vulnerabilidad: ' + f(m.vulnerabilidad) + '     ·     Edad: ' + (edad ?? '—') + ' años', 12, y);
+    y += 6;
+
+    const seccion = (titulo, pares) => {
+      doc.autoTable({
+        startY: y,
+        head: [[{ content: titulo, colSpan: 2, styles: { fillColor: [0, 47, 108], textColor: 255, halign: 'left', fontStyle: 'bold', fontSize: 10 } }]],
+        body: pares.map(([k, v]) => [{ content: k, styles: { fontStyle: 'bold', textColor: [71, 85, 105], cellWidth: 58 } }, String(v ?? '—')]),
+        theme: 'grid', styles: { fontSize: 9, cellPadding: 2.2, lineColor: [226, 232, 240], textColor: [30, 41, 59] },
+        margin: { left: 12, right: 12 },
+      });
+      y = doc.lastAutoTable.finalY + 4;
+    };
+    const tabla = (titulo, head, rows) => {
+      doc.autoTable({
+        startY: y,
+        head: [[{ content: titulo, colSpan: head.length, styles: { fillColor: [0, 47, 108], textColor: 255, halign: 'left', fontStyle: 'bold', fontSize: 10 } }], head],
+        body: rows.length ? rows : [[{ content: 'Sin registros', colSpan: head.length, styles: { halign: 'center', textColor: [148, 163, 184], fontStyle: 'italic' } }]],
+        theme: 'grid', headStyles: { fillColor: [217, 229, 245], textColor: [0, 47, 108], fontSize: 8.5 },
+        styles: { fontSize: 8.5, cellPadding: 2, lineColor: [226, 232, 240], textColor: [30, 41, 59] },
+        margin: { left: 12, right: 12 },
+      });
+      y = doc.lastAutoTable.finalY + 4;
+    };
+
+    seccion('Datos del niño/a', [
+      ['Nombres', f(ninoNom)], ['Apellidos', f(ninoApe)],
+      ['Género', gen(m.ninoGeneroId || m.nino_genero_id)], ['Fecha de nacimiento', f(fnac)],
+      ['País de nacimiento', pais(m.ninoPaisNacimientoId || m.nino_pais_nacimiento_id)],
+      ['Idioma', L('idiomas', m.ninoIdiomaId || m.nino_idioma_id)],
+      ['Nivel educativo', L('nivelesEducacion', m.ninoNivelEducacionId || m.nino_nivel_educacion_id)],
+      ['Municipio', f(m.ninoMunicipio || m.nino_municipio)],
+      ['Vacunas', f(m.ninoVacunas || m.nino_vacunas)], ['Medicación', f(m.ninoMedicacion || m.nino_medicacion)],
+      ['Discapacidades', f(m.ninoDiscapacidades || m.nino_discapacidades)],
+    ]);
+    seccion('Adulto acompañante', [
+      ['Nombres', f(m.adultoNombres || m.adulto_nombres)], ['Apellidos', f(m.adultoApellidos || m.adulto_apellidos)],
+      ['Género', gen(m.adultoGeneroId || m.generoId || m.adulto_genero_id)],
+      ['Nacionalidad', L('nacionalidades', m.nacionalidadId || m.adultoNacionalidadId || m.adulto_nacionalidad_id)],
+      ['Nexo con el niño/a', L('nexos', m.nexoId || m.adultoNexoId || m.adulto_nexo_id)],
+      ['Teléfono', f(m.adultoTelefono || m.adulto_telefono)], ['Email', f(m.adultoEmail || m.email || m.adulto_email)],
+      ['País', pais(m.adultoPaisId || m.adulto_pais_id)],
+      ['Permiso de residencia', fb(m.adultoPermisoResidencia)], ['Permiso de trabajo', fb(m.adultoPermisoTrabajo)],
+      ['Custodia del niño/a', fb(m.adultoCustodia)],
+    ]);
+    seccion('Ruta y situación', [
+      ['País de procedencia', pais(m.paisOrigenId || m.procedenciaPaisId || m.procedencia_pais_id)],
+      ['País de destino', pais(m.destinoFinalPaisId || m.destino_final_pais_id)],
+      ['Razón de emigración', L('razonesEmigracion', m.adultoRazonId || m.adulto_razon_emigracion_id)],
+      ['Generación de ingresos', L('generacionIngresos', m.ingresosId || m.generacionIngresosId || m.generacion_ingresos_id)],
+    ]);
+    seccion('Entrevista', [
+      ['Fecha', f(m.fechaEntrevista || m.fecha_entrevista)],
+      ['Organización', org(m.orgId || m.org_id)],
+      ['País', pais(m.paisEntrevistaId || m.pais_entrevista_id)],
+      ['Ciudad', L('ciudades', m.ciudadEntrevistaId || m.ciudad_entrevista_id)],
+      ['Consentimiento', fb(m.consentimiento)],
+    ]);
+
+    tabla('Grupo de viaje', ['Nombre', 'Género', 'Nexo', 'Fecha nac.', 'Edad'],
+      (m.grupoViaje || []).map(g => [f(g.nombre), gen(g.generoId), L('nexos', g.nexoId), f(g.fechaNacimiento), g.edad ?? '—']));
+    tabla('Ruta migratoria', ['Fecha', 'País', 'Ciudad', 'Organización', 'Servicios'],
+      (m.ruta || []).map(r => [f(r.fecha), pais(r.paisId), L('ciudades', r.ciudadId), org(r.orgId), (r.servicios || []).map(s => L('tiposServicio', s)).join(', ') || '—']));
+    seccion('Recomendaciones', [
+      ['Último centro de acogida', f(m.recUltimoCentro || m.rec_ultimo_centro)],
+      ['Siguiente punto', f(m.recSiguientePuesto || m.rec_siguiente_puesto)],
+      ['Familia de referencia', f(m.recFamilia || m.rec_familia)],
+    ]);
+
+    const total = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= total; i++) {
+      doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150, 150, 150);
+      doc.text('vidasenmovimiento.com', 12, pageH - 6);
+      doc.text('Ficha ' + m.id + ' · Página ' + i + '/' + total, pageW - 12, pageH - 6, { align: 'right' });
+    }
+
+    doc.save('Ficha_' + m.id + '_' + (nombre.replace(/\s+/g, '_') || 'migrante') + '.pdf');
+    showToast('Ficha PDF generada', 'success');
+  } catch (e) {
+    console.error('exportarFichaMigrantePDF', e);
+    showToast('No se pudo generar la ficha', 'error');
+  }
 }
 
 // ─── CONTROLES DEL SHELL (eventos) ───────────────────────────
