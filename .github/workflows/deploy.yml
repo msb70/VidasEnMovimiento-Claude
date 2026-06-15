@@ -1,0 +1,51 @@
+name: Deploy a Hostinger
+
+# Despliega el sitio estático a Hostinger en cada push a main.
+# Requiere 4 secrets en el repo (Settings -> Secrets and variables -> Actions):
+#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR
+# Ver docs/ci-cd.md para cómo obtenerlos.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # permite lanzarlo manualmente desde la pestaña Actions
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build estático + FTP deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar sintaxis de JS (frena deploys rotos)
+        run: |
+          node --check app.js
+          node --check supabase-data.js
+          node --check mockData.js
+          node --check supabase-config.js
+
+      - name: Preparar artefactos estáticos (solo archivos web)
+        run: |
+          mkdir -p dist
+          cp index.html app.js styles.css mockData.js supabase-config.js supabase-data.js dist/
+          cp -r assets dist/
+          echo "Contenido a desplegar:" && find dist -type f | sort
+
+      - name: Desplegar por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:      ${{ secrets.FTP_SERVER }}
+          username:    ${{ secrets.FTP_USERNAME }}
+          password:    ${{ secrets.FTP_PASSWORD }}
+          server-dir:  ${{ secrets.FTP_SERVER_DIR }}
+          local-dir:   ./dist/
+          protocol:    ftps          # FTP sobre TLS (recomendado por Hostinger)
+          # Si FTPS falla, cambia a:  protocol: ftp
+          # dangerous-clean-slate: borra en el servidor lo que no esté en dist.
+          # Se deja en false: solo sube cambios.
+          dangerous-clean-slate: false
