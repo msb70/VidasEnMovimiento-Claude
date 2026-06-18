@@ -3603,19 +3603,35 @@ function _buildNNAOptions(ciudadF, migrantes) {
 
   // Cada migrante = un NNA con su propia ruta completa. Se keya por id.
   // (NO se agrupa por nombre: hay nombres repetidos que son personas distintas.)
-  return lista.slice()
-    .sort((a, b) => {
-      const la = (a.ninoApellidos||a.apellidos||'') + ' ' + (a.ninoNombres||a.nombres||'');
-      const lb = (b.ninoApellidos||b.apellidos||'') + ' ' + (b.ninoNombres||b.nombres||'');
-      return la < lb ? -1 : la > lb ? 1 : 0;
-    })
-    .map(m => {
-      const nom = m.ninoNombres || m.nombres || '';
-      const ape = m.ninoApellidos || m.apellidos || '';
-      const pts = (m.ruta || []).length;
-      const etiqueta = pts > 1 ? ` · ${pts} puntos de ruta` : ' · 1 punto';
-      return `<option value="${escapeHtml(m.id)}">${escapeHtml(ape)}, ${escapeHtml(nom)}${etiqueta}</option>`;
-    }).join('');
+  // 1) Orden alfabético base: agrupa nombres idénticos o parecidos como vecinos.
+  const ordenado = lista.slice().sort((a, b) => {
+    const la = (a.ninoApellidos||a.apellidos||'') + ' ' + (a.ninoNombres||a.nombres||'');
+    const lb = (b.ninoApellidos||b.apellidos||'') + ' ' + (b.ninoNombres||b.nombres||'');
+    return la.localeCompare(lb, 'es');
+  });
+
+  // 2) Dispersión determinista: se recorre la lista alfabética con un paso
+  //    coprimo con n (~razón áurea). Como visita índices muy separados, los
+  //    apellidos/nombres parecidos o repetidos NUNCA quedan contiguos en el
+  //    desplegable y el orden deja de ser alfabético. Sin azar y reproducible.
+  const n = ordenado.length;
+  let disperso = ordenado;
+  if (n > 2) {
+    const gcd = (x, y) => (y ? gcd(y, x % y) : x);
+    let step = Math.max(2, Math.round(n * 0.6180339887));
+    while (step > 1 && gcd(step, n) !== 1) step--;
+    if (step < 1) step = 1;
+    disperso = [];
+    for (let k = 0, idx = 0; k < n; k++, idx = (idx + step) % n) disperso.push(ordenado[idx]);
+  }
+
+  return disperso.map(m => {
+    const nom = m.ninoNombres || m.nombres || '';
+    const ape = m.ninoApellidos || m.apellidos || '';
+    const pts = (m.ruta || []).length;
+    const etiqueta = pts > 1 ? ` · ${pts} puntos de ruta` : ' · 1 punto';
+    return `<option value="${escapeHtml(m.id)}">${escapeHtml(ape)}, ${escapeHtml(nom)}${etiqueta}</option>`;
+  }).join('');
 }
 
 // Reconstruye la tabla "Distribución por Ciudad — Red FEM" según el filtro activo.
