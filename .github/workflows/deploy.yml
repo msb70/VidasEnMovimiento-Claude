@@ -86,4 +86,6 @@ jobs:
           server-dir:  ${{ secrets.FTP_SERVER_DIR }}
           local-dir:   ./dist/
           protocol:    ftps          # si tu cuenta no tiene FTPS, cambia a: ftp
+          port:        21            # FTPS explícito de Hostinger
+          timeout:     120000        # 120s: evita "Timeout (control socket)" en handshakes lentos
           dangerous-clean-slate: false

@@ -1155,8 +1155,12 @@ function renderListado() {
   const visibles  = getVisibleMigrantes();
   const tempState = AppState.migrantes;
   AppState.migrantes = visibles;
-  const todos = DB.migrantes.list(filtros);
+  const todosSinOrden = DB.migrantes.list(filtros);
   AppState.migrantes = tempState;
+  // Orden disperso (no alfabético, sin apellidos/nombres parecidos o repetidos
+  // contiguos), igual criterio que el selector de ruta. Determinista → la
+  // paginación es estable entre renders.
+  const todos = dispersarLista(todosSinOrden, m => (m.apellidos||'') + ' ' + (m.nombres||''));
   const total = todos.length;
   const inicio = (_listadoPage - 1) * POR_PAGINA;
   const pagina = todos.slice(inicio, inicio + POR_PAGINA);
@@ -3603,27 +3607,9 @@ function _buildNNAOptions(ciudadF, migrantes) {
 
   // Cada migrante = un NNA con su propia ruta completa. Se keya por id.
   // (NO se agrupa por nombre: hay nombres repetidos que son personas distintas.)
-  // 1) Orden alfabético base: agrupa nombres idénticos o parecidos como vecinos.
-  const ordenado = lista.slice().sort((a, b) => {
-    const la = (a.ninoApellidos||a.apellidos||'') + ' ' + (a.ninoNombres||a.nombres||'');
-    const lb = (b.ninoApellidos||b.apellidos||'') + ' ' + (b.ninoNombres||b.nombres||'');
-    return la.localeCompare(lb, 'es');
-  });
-
-  // 2) Dispersión determinista: se recorre la lista alfabética con un paso
-  //    coprimo con n (~razón áurea). Como visita índices muy separados, los
-  //    apellidos/nombres parecidos o repetidos NUNCA quedan contiguos en el
-  //    desplegable y el orden deja de ser alfabético. Sin azar y reproducible.
-  const n = ordenado.length;
-  let disperso = ordenado;
-  if (n > 2) {
-    const gcd = (x, y) => (y ? gcd(y, x % y) : x);
-    let step = Math.max(2, Math.round(n * 0.6180339887));
-    while (step > 1 && gcd(step, n) !== 1) step--;
-    if (step < 1) step = 1;
-    disperso = [];
-    for (let k = 0, idx = 0; k < n; k++, idx = (idx + step) % n) disperso.push(ordenado[idx]);
-  }
+  // Orden disperso (no alfabético, sin nombres parecidos/repetidos contiguos).
+  const disperso = dispersarLista(lista, m =>
+    (m.ninoApellidos||m.apellidos||'') + ' ' + (m.ninoNombres||m.nombres||''));
 
   return disperso.map(m => {
     const nom = m.ninoNombres || m.nombres || '';
