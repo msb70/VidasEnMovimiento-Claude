@@ -1,11 +1,13 @@
 name: CI/CD — Pruebas + Deploy a Hostinger
 
 # En cada push a main: primero corre las pruebas (RLS, funciones, edge, integridad).
-# Solo si pasan, despliega el sitio estático a Hostinger.
+# Solo si pasan, publica los archivos web a la rama `deploy`.
+# Hostinger (hPanel -> Git) auto-despliega esa rama a public_html.
 #
 # Secrets requeridos (Settings -> Secrets and variables -> Actions):
 #   Pruebas:  SUPABASE_SERVICE_ROLE_KEY
-#   Deploy:   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR
+#   Deploy:   ninguno (usa el GITHUB_TOKEN integrado para empujar a la rama deploy).
+# Ya NO se usan FTP_SERVER / FTP_USERNAME / FTP_PASSWORD / FTP_SERVER_DIR.
 # Ver docs/ci-cd.md.
 
 on:
@@ -62,10 +64,16 @@ jobs:
         run: npm test
 
   # ─────────────────────────────────────────────────────────────
-  deploy:
-    name: Deploy estático a Hostinger
-    needs: [ test ]          # ← gate: solo despliega si las pruebas pasan
+  # Publica SOLO los archivos web a la rama `deploy`.
+  # Hostinger (hPanel -> Git) queda conectado a esa rama con auto-deploy,
+  # así que cada push a main -> pruebas -> rama deploy -> sitio actualizado.
+  # Sin FTP, sin tokens externos: usa el GITHUB_TOKEN integrado.
+  publish:
+    name: Publicar a rama deploy (Hostinger auto-deploy)
+    needs: [ test ]          # ← gate: solo publica si las pruebas pasan
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # necesario para empujar a la rama deploy
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,17 +83,13 @@ jobs:
           mkdir -p dist
           cp index.html lib.js app.js styles.css mockData.js supabase-config.js supabase-data.js dist/
           cp -r assets dist/
-          echo "Contenido a desplegar:" && find dist -type f | sort
+          echo "Contenido a publicar:" && find dist -type f | sort
 
-      - name: Desplegar por FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Publicar dist/ a la rama deploy
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          server:      ${{ secrets.FTP_SERVER }}
-          username:    ${{ secrets.FTP_USERNAME }}
-          password:    ${{ secrets.FTP_PASSWORD }}
-          server-dir:  ${{ secrets.FTP_SERVER_DIR }}
-          local-dir:   ./dist/
-          protocol:    ftps          # si tu cuenta no tiene FTPS, cambia a: ftp
-          port:        21            # FTPS explícito de Hostinger
-          timeout:     120000        # 120s: evita "Timeout (control socket)" en handshakes lentos
-          dangerous-clean-slate: false
+          github_token:  ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:   ./dist
+          publish_branch: deploy
+          force_orphan:  true        # la rama deploy queda limpia, solo con los archivos web
+          commit_message: "deploy: publicar build estático desde ${{ github.sha }}"
