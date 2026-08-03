@@ -10,6 +10,7 @@ const ROUTE_LABELS = {
   '/migrantes/dashboard':        ['Migrantes', 'Dashboard'],
   '/migrantes/listado':          ['Migrantes', 'Listado'],
   '/migrantes/mapa':             ['Migrantes', 'Mapa de Rutas'],
+  '/migrantes/historia':         ['Migrantes', 'Historia de los Datos'],
   '/datos/paises':               ['Parámetros', 'Países'],
   '/datos/ciudades':             ['Parámetros', 'Ciudades'],
   '/datos/nacionalidades':       ['Parámetros', 'Nacionalidad'],
@@ -129,6 +130,7 @@ function navigate(route, params = {}) {
   if (route === '/migrantes/dashboard')     return viewDashboard(content);
   if (route === '/migrantes/listado')       return viewMigranteListado(content, params);
   if (route === '/migrantes/mapa')          return viewMapaMigrantes(content);
+  if (route === '/migrantes/historia')      return viewHistoriaDatos(content);
 
   if (route.startsWith('/datos/'))          return viewCatalogo(content, route, params);
 
