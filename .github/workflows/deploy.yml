@@ -40,6 +40,7 @@ jobs:
           node --check supabase-data.js
           node --check mockData.js
           node --check supabase-config.js
+          node --check historia.js
 
       - name: Instalar dependencias de pruebas
         working-directory: tests
@@ -81,7 +82,7 @@ jobs:
       - name: Preparar artefactos estáticos (solo archivos web)
         run: |
           mkdir -p dist
-          cp index.html lib.js app.js styles.css mockData.js supabase-config.js supabase-data.js dist/
+          cp index.html lib.js app.js historia.js styles.css mockData.js supabase-config.js supabase-data.js dist/
           cp -r assets dist/
           echo "Contenido a publicar:" && find dist -type f | sort
 
