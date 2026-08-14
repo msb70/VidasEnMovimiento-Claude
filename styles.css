@@ -1120,7 +1120,18 @@ tbody tr:hover td { background: var(--color-surface-2); }
 .hd-body strong { color: var(--color-primary-dark); }
 .hd-lead {
   font-size: clamp(16px, 2.1vw, 20px); line-height: 1.7;
-  color: #D7E3F4; max-width: 640px; margin: 0 0 44px;
+  color: #D7E3F4; max-width: 640px; margin: 0 0 20px;
+}
+.hd-hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px; margin: 0 0 34px;
+  font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  color: #9FD8DF; background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18); border-radius: 999px;
+}
+.hd-hero-badge::before {
+  content: ''; width: 7px; height: 7px; border-radius: 50%;
+  background: #17A65A; box-shadow: 0 0 0 3px rgba(23,166,90,.25);
 }
 .hd-viz-caption {
   font-size: 13px; font-weight: 700; color: var(--color-text-light);

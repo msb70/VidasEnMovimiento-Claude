@@ -269,6 +269,23 @@ function viewHistoriaDatos(container) {
     const periodo = S.fechaMin && S.fechaMax
       ? `${S.fechaMin.substring(0, 7)} → ${S.fechaMax.substring(0, 7)}` : '—';
 
+    // Periodo en formato largo, para la narrativa
+    const HD_MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const mesAnio = (f) => {
+      if (!f) return '—';
+      const [a, m] = String(f).split('-');
+      return `${HD_MESES[parseInt(m, 10) - 1]} de ${a}`;
+    };
+    const periodoLargo = S.fechaMin && S.fechaMax ? `${mesAnio(S.fechaMin)} y ${mesAnio(S.fechaMax)}` : '—';
+    const mesAnioMax = mesAnio(S.fechaMax);
+
+    // Educación: nivel más frecuente y trayectorias escolares interrumpidas
+    const nivelTop = S.educacion[0] || ['—', 0];
+    const interrumpidos = ['Sin escolarización', 'Primario incompleto', 'Secundario incompleto']
+      .reduce((acc, l) => acc + ((S.educacion.find(d => d[0] === l) || [null, 0])[1]), 0);
+    const deCadaDiezEdu = Math.round(10 * interrumpidos / S.total);
+
     container.innerHTML = `
     <div id="hd-root">
 
@@ -294,8 +311,9 @@ function viewHistoriaDatos(container) {
           <p class="hd-lead hd-reveal">
             Detrás de cada fila de esta base de datos hay un niño, una niña o un adolescente
             que dejó su casa. Esto es lo que ${hdFmt(S.total)} historias registradas entre
-            ${periodo} nos cuentan sobre la ruta migratoria.
+            ${periodoLargo} nos cuentan sobre la ruta migratoria.
           </p>
+          <div class="hd-hero-badge hd-reveal">Datos actualizados hasta ${mesAnioMax}</div>
           <div class="hd-hero-kpis">
             <div class="hd-hero-kpi hd-reveal">${hdBigNumber(S.total)}<span>niños, niñas y adolescentes</span></div>
             <div class="hd-hero-kpi hd-reveal">${hdBigNumber(S.atenciones)}<span>atenciones registradas</span></div>
@@ -369,13 +387,19 @@ function viewHistoriaDatos(container) {
 
       <!-- ── CAP. 4: EDUCACIÓN ────────────────────────────── -->
       ${hdSection('educacion', 'Capítulo 4 · Educación',
-        'La escuela quedó atrás', `
+        'La escuela quedó a medias', `
         <p class="hd-body hd-reveal">
-          Migrar interrumpe trayectorias escolares. ${sinEsc ? `<strong>${hdFmt(sinEsc[1])} niños y niñas
-          (${hdPct(sinEsc[1], S.total)}%) no tienen ninguna escolarización</strong>` : 'Una parte de los registros no tiene escolarización'}
-          ${primInc ? `y otros ${hdFmt(primInc[1])} dejaron la primaria sin terminar` : ''}.
+          Migrar interrumpe trayectorias escolares. El nivel más frecuente es
+          <strong>${escapeHtml(nivelTop[0])}</strong>, con ${hdFmt(nivelTop[1])} registros
+          (${hdPct(nivelTop[1], S.total)}%): adolescentes que dejaron el aula a mitad de camino.
+          ${sinEsc ? `A ellos se suman ${hdFmt(sinEsc[1])} niños y niñas sin ninguna escolarización` : ''}
+          ${primInc ? ` y ${hdFmt(primInc[1])} que abandonaron la primaria sin terminarla` : ''}.
           Cada punto de atención en la ruta es también una oportunidad de reconectarlos con el aula.
         </p>
+        <div class="hd-callout hd-reveal">
+          <div class="hd-callout-num">${deCadaDiezEdu} de cada 10</div>
+          <div class="hd-callout-txt">llegan a la ruta con la <strong>trayectoria escolar cortada</strong>: sin escolarización, primaria incompleta o secundaria incompleta (${hdFmt(interrumpidos)} registros, ${hdPct(interrumpidos, S.total)}%).</div>
+        </div>
         <p class="hd-viz-caption hd-reveal">Último nivel educativo registrado:</p>
         ${hdBars(S.educacion.slice(0, 10), { color: '#F47C00' })}
       `, { theme: 'hd-alt' })}
@@ -482,7 +506,7 @@ function viewHistoriaDatos(container) {
           </div>
           <p class="hd-footnote hd-reveal">
             Todas las cifras se calculan en tiempo real sobre los ${hdFmt(S.total)} registros de la base de datos
-            de la plataforma · Periodo ${periodo} · ${hdFmt(S.orgs)} organizaciones aportantes.
+            de la plataforma · Periodo ${periodo} (datos actualizados hasta ${mesAnioMax}) · ${hdFmt(S.orgs)} organizaciones aportantes.
           </p>
         </div>
       </section>
