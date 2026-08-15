@@ -150,6 +150,16 @@ function hdComputeStats() {
   }));
   const serieMeses = Object.entries(porMes).sort((a, b) => a[0] < b[0] ? -1 : 1);
 
+  // Escolarización: niños en edad escolar (6-17) que figuran sin escolarización
+  let edadEscolar = 0, desescolarizados = 0;
+  migs.forEach(m => {
+    const e = calcEdadDesde(m.fechaNacimiento);
+    if (e !== null && e >= 6 && e <= 17) {
+      edadEscolar++;
+      if (label('nivelesEducacion', m.ninoNivelEducacionId) === 'Sin escolarización') desescolarizados++;
+    }
+  });
+
   // Destino final EE.UU.
   const destinoUS = migs.filter(m => m.destinoFinalPaisId === 'US').length;
   const paisesConParadas = Object.keys(porPaisParada).length;
@@ -166,7 +176,7 @@ function hdComputeStats() {
     ciudadesTop, edades, edadProm, edadDist, rangoTop,
     conGrupo, acomp, acompMenores,
     nexos: Object.entries(nexoCounts).sort((a, b) => b[1] - a[1]),
-    servicios, estados, serieMeses,
+    servicios, estados, serieMeses, edadEscolar, desescolarizados,
     duracionProm: duracionN ? duracionSum / duracionN : 0,
     multiPunto, destinoUS, fechaMin, fechaMax,
   };
@@ -258,8 +268,6 @@ function viewHistoriaDatos(container) {
     const noVzla = S.total - (nacVzla ? nacVzla[1] : 0);
     const unoDeCadaNac = noVzla > 0 ? Math.max(2, Math.round(S.total / noVzla)) : 0;
     const cucuta = S.ciudadesTop[0] || { label: '—', n: 0 };
-    const sinEsc = S.educacion.find(d => d[0] === 'Sin escolarización');
-    const primInc = S.educacion.find(d => d[0] === 'Primario incompleto');
     const perdidos = S.estados['perdido_seguimiento'] || 0;
     const unoDeCadaPerd = perdidos > 0 ? Math.round(S.total / perdidos) : 0;
     const razonTop = S.razones[0] || ['—', 0];
@@ -280,11 +288,12 @@ function viewHistoriaDatos(container) {
     const periodoLargo = S.fechaMin && S.fechaMax ? `${mesAnio(S.fechaMin)} y ${mesAnio(S.fechaMax)}` : '—';
     const mesAnioMax = mesAnio(S.fechaMax);
 
-    // Educación: nivel más frecuente y trayectorias escolares interrumpidas
-    const nivelTop = S.educacion[0] || ['—', 0];
-    const interrumpidos = ['Sin escolarización', 'Primario incompleto', 'Secundario incompleto']
-      .reduce((acc, l) => acc + ((S.educacion.find(d => d[0] === l) || [null, 0])[1]), 0);
-    const deCadaDiezEdu = Math.round(10 * interrumpidos / S.total);
+    // Educación / escolarización
+    const eduN = (l) => (S.educacion.find(d => d[0] === l) || [l, 0])[1];
+    const cursandoPrim = eduN('Primario incompleto');
+    const cursandoSec = eduN('Secundario incompleto');
+    const tasaDesesc = hdPct(S.desescolarizados, S.edadEscolar, 1);
+    const unoDeCadaEsc = S.desescolarizados > 0 ? Math.round(S.edadEscolar / S.desescolarizados) : 0;
 
     container.innerHTML = `
     <div id="hd-root">
@@ -387,21 +396,26 @@ function viewHistoriaDatos(container) {
 
       <!-- ── CAP. 4: EDUCACIÓN ────────────────────────────── -->
       ${hdSection('educacion', 'Capítulo 4 · Educación',
-        'La escuela quedó a medias', `
+        `Casi 1 de cada ${unoDeCadaEsc} está fuera del aula`, `
         <p class="hd-body hd-reveal">
-          Migrar interrumpe trayectorias escolares. El nivel más frecuente es
-          <strong>${escapeHtml(nivelTop[0])}</strong>, con ${hdFmt(nivelTop[1])} registros
-          (${hdPct(nivelTop[1], S.total)}%): adolescentes que dejaron el aula a mitad de camino.
-          ${sinEsc ? `A ellos se suman ${hdFmt(sinEsc[1])} niños y niñas sin ninguna escolarización` : ''}
-          ${primInc ? ` y ${hdFmt(primInc[1])} que abandonaron la primaria sin terminarla` : ''}.
-          Cada punto de atención en la ruta es también una oportunidad de reconectarlos con el aula.
+          De los ${hdFmt(S.edadEscolar)} niños, niñas y adolescentes <strong>en edad escolar</strong>
+          (6 a 17 años), <strong>${hdFmt(S.desescolarizados)} no están escolarizados: el ${tasaDesesc}%</strong>.
+          Migrar no solo interrumpe el curso; en muchos casos lo cancela — cada frontera reinicia el
+          trámite de matrícula, y sin papeles el aula deja de ser una opción.
+          El resto sostiene su trayectoria a pesar de la ruta: ${hdFmt(cursandoPrim)} cursando primaria
+          y ${hdFmt(cursandoSec)} cursando secundaria.
         </p>
         <div class="hd-callout hd-reveal">
-          <div class="hd-callout-num">${deCadaDiezEdu} de cada 10</div>
-          <div class="hd-callout-txt">llegan a la ruta con la <strong>trayectoria escolar cortada</strong>: sin escolarización, primaria incompleta o secundaria incompleta (${hdFmt(interrumpidos)} registros, ${hdPct(interrumpidos, S.total)}%).</div>
+          <div class="hd-callout-num">1 de cada ${unoDeCadaEsc}</div>
+          <div class="hd-callout-txt">en edad escolar está <strong>fuera del sistema educativo</strong>. Cada punto de atención de la red es una oportunidad de reconectarlos con el aula.</div>
         </div>
         <p class="hd-viz-caption hd-reveal">Último nivel educativo registrado:</p>
         ${hdBars(S.educacion.slice(0, 10), { color: '#F47C00' })}
+        <p class="hd-footnote-inline hd-reveal">
+          Nota metodológica: el nivel registrado es el <strong>último alcanzado</strong>. La categoría
+          <em>Preescolar / Inicial</em> agrupa a los menores de 5 años, que aún no tienen edad de
+          escolarización obligatoria, y por eso no computan en la tasa anterior.
+        </p>
       `, { theme: 'hd-alt' })}
 
       <!-- ── CAP. 5: COMPAÑÍA ─────────────────────────────── -->
