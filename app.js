@@ -3675,6 +3675,9 @@ function renderRutasMapa() {
   const layers = window._mapaRutasLayers || {};
   Object.values(layers).forEach(l => { try { map.removeLayer(l); } catch(e){} });
   window._mapaRutasLayers = {};
+  // Detener animación de ruta previa y quitar su botón
+  window._rutaAnimToken = (window._rutaAnimToken || 0) + 1;
+  if (window._rutaAnimCtl) { try { map.removeControl(window._rutaAnimCtl); } catch(e){} window._rutaAnimCtl = null; }
 
   const ciudadF = (document.getElementById('ruta-filtro-ciudad') || {}).value || '';
   const modo    = (document.getElementById('ruta-modo')          || {}).value || 'rutas';
@@ -3891,11 +3894,27 @@ function renderRutasMapa() {
       }
 
       if (puntos.length >= 2) {
-        // Línea sólida — ruta entre puntos de atención (más antiguo → más reciente)
-        addLayer('nna_ruta', L.polyline(puntos, {
-          color: '#DC2626', weight: 4, opacity: 0.85, lineJoin: 'round',
+        // ── Ruta animada: la trayectoria se dibuja parada a parada ──
+        var _animTok = (window._rutaAnimToken = (window._rutaAnimToken || 0) + 1);
+        var _reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        var _destCoordsAnim = _destinoFinalId && _MAP_COORDS[_destinoFinalId];
+        var _animBounds = null;
+        try {
+          var _bPts = puntos.slice();
+          if (_destCoordsAnim) _bPts.push(_destCoordsAnim);
+          _animBounds = L.latLngBounds(_bPts).pad(0.15);
+          map.fitBounds(_animBounds);
+        } catch(e){}
+
+        var _glow = addLayer('nna_ruta_glow', L.polyline([puntos[0]], {
+          color: '#F47C00', weight: 14, opacity: 0.22, lineJoin: 'round', lineCap: 'round', interactive: false,
         }));
-        puntos.forEach(function(pt, idx) {
+        var _line = addLayer('nna_ruta', L.polyline([puntos[0]], {
+          color: '#F47C00', weight: 4.5, opacity: 0.95, lineJoin: 'round', lineCap: 'round',
+        }));
+        var _dots = [];
+        function _mkDot(idx) {
+          var pt       = puntos[idx];
           var paso     = pasos[idx];
           var lugLabel = _pasoLabel(paso, 'Punto ' + (idx+1));
           var isFirst  = idx === 0;
@@ -3904,24 +3923,103 @@ function renderRutasMapa() {
           var titulo   = isFirst ? '🟢 Origen' : (isLast ? '🔴 Última parada' : '🔵 Parada ' + (idx + 1));
           var dot = L.circleMarker(pt, {
             radius: 10, fillColor: color, color: '#fff', weight: 2, fillOpacity: 1,
+            className: _reduceMotion ? '' : 'ruta-anim-dot',
           });
           dot.bindPopup('<div style="font-family:Inter,sans-serif;">'
             + '<b style="color:#002F6C;">' + titulo + '</b>'
             + '<p style="margin:4px 0 0;font-size:12px;color:#475569;">' + lugLabel + '</p>'
             + (paso && paso.fecha ? '<p style="margin:2px 0 0;font-size:11px;color:#94A3B8;">' + paso.fecha + '</p>' : '')
             + '</div>', { closeButton: false });
+          dot.bindTooltip('<b>' + (idx + 1) + ' · ' + lugLabel + '</b>'
+            + (paso && paso.fecha ? '<br><span>' + Helpers.formatFecha(paso.fecha) + '</span>' : ''),
+            { direction: 'top', offset: [0, -12], className: 'ruta-anim-tip' });
           addLayer('nna_punto_' + idx, dot);
+          _dots[idx] = dot;
+          return dot;
+        }
+        var _head = L.marker(puntos[0], {
+          icon: L.divIcon({ className: '', html: '<div class="ruta-anim-head"></div>', iconSize: [22, 22], iconAnchor: [11, 11] }),
+          interactive: false, keyboard: false,
         });
-        // Punto 3: destino proyectado desde el último punto registrado
-        _addCorridorLine(puntos[puntos.length - 1]);
-        try {
-          var allLayers = Object.values(window._mapaRutasLayers).filter(function(l) { return l.getBounds; });
-          var bounds = allLayers.reduce(function(b, l) {
-            try { return b ? b.extend(l.getBounds()) : l.getBounds(); } catch(e) { return b; }
-          }, null);
-          if (bounds) map.fitBounds(bounds.pad(0.2));
-          else map.fitBounds(window._mapaRutasLayers['nna_ruta'].getBounds().pad(0.3));
-        } catch(e){}
+
+        function _finRuta() {
+          _dots.forEach(function(d, i) { if (d && i !== puntos.length - 1) d.closeTooltip(); });
+          if (_dots[puntos.length - 1]) _dots[puntos.length - 1].openTooltip();
+          _addCorridorLine(puntos[puntos.length - 1]);
+          var _proj = window._mapaRutasLayers['nna_dest_line'];
+          if (_proj && _proj._path && !_reduceMotion) _proj._path.classList.add('ruta-anim-proj');
+        }
+
+        function _startRutaAnim() {
+          var tok = (window._rutaAnimToken = (window._rutaAnimToken || 0) + 1);
+          ['nna_dest_line', 'nna_dest_punto'].forEach(function(k) {
+            var l = window._mapaRutasLayers[k];
+            if (l) { try { map.removeLayer(l); } catch(e){} delete window._mapaRutasLayers[k]; }
+          });
+          _dots.forEach(function(d, i) {
+            if (d) { try { map.removeLayer(d); } catch(e){} delete window._mapaRutasLayers['nna_punto_' + i]; }
+          });
+          _dots = [];
+          if (_reduceMotion) {
+            _line.setLatLngs(puntos); _glow.setLatLngs(puntos);
+            puntos.forEach(function(_, i) { _mkDot(i); });
+            _finRuta();
+            return;
+          }
+          if (!map.hasLayer(_head)) addLayer('nna_ruta_head', _head);
+          _head.setLatLng(puntos[0]);
+          _line.setLatLngs([puntos[0]]); _glow.setLatLngs([puntos[0]]);
+          _mkDot(0).openTooltip();
+          var SEG_MS = 1200, PAUSA_MS = 450;
+          var seg = 0, t0 = null, trail = [L.latLng(puntos[0])];
+          function frame(ts) {
+            if (window._rutaAnimToken !== tok || !map.hasLayer(_line)) return;
+            if (t0 === null) t0 = ts;
+            var a = L.latLng(puntos[seg]), b = L.latLng(puntos[seg + 1]);
+            var p = Math.max(0, Math.min(1, (ts - t0) / SEG_MS));
+            var e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+            var cur = L.latLng(a.lat + (b.lat - a.lat) * e, a.lng + (b.lng - a.lng) * e);
+            var pts = trail.concat([cur]);
+            _line.setLatLngs(pts); _glow.setLatLngs(pts); _head.setLatLng(cur);
+            if (p >= 1) {
+              trail.push(b);
+              if (_dots[seg]) _dots[seg].closeTooltip();
+              _mkDot(seg + 1).openTooltip();
+              seg++;
+              if (seg >= puntos.length - 1) { _finRuta(); return; }
+              t0 = ts + PAUSA_MS;
+            }
+            requestAnimationFrame(frame);
+          }
+          requestAnimationFrame(frame);
+        }
+        // Encuadre cinematográfico sobre la ruta y, al terminar, arranca el recorrido
+        setTimeout(function() {
+          if (window._rutaAnimToken !== _animTok) return;
+          var started = false;
+          function go() { if (started || window._rutaAnimToken !== _animTok) return; started = true; _startRutaAnim(); }
+          try {
+            map.invalidateSize();
+            if (_animBounds && !_reduceMotion) {
+              map.once('moveend', go);
+              map.flyToBounds(_animBounds, { duration: 1.2 });
+              setTimeout(go, 1800);
+            } else { if (_animBounds) map.fitBounds(_animBounds); go(); }
+          } catch(e) { go(); }
+        }, 400);
+
+        // Botón para volver a reproducir el recorrido
+        var _ctl = L.control({ position: 'topright' });
+        _ctl.onAdd = function() {
+          var btn = L.DomUtil.create('button', 'ruta-anim-replay');
+          btn.type = 'button';
+          btn.innerHTML = '▶ Repetir recorrido';
+          L.DomEvent.disableClickPropagation(btn);
+          L.DomEvent.on(btn, 'click', function() { _startRutaAnim(); });
+          return btn;
+        };
+        _ctl.addTo(map);
+        window._rutaAnimCtl = _ctl;
 
       } else {
         // Un solo punto registrado

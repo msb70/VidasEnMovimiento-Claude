@@ -1351,3 +1351,34 @@ tbody tr:hover td { background: var(--color-surface-2); }
 .hd-final-callout { background: rgba(255,255,255,.06); border-left-color: #F47C00; }
 .hd-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 34px 0 30px; }
 .hd-footnote { font-size: 12px; color: #7E9CC4; line-height: 1.6; margin: 0; }
+
+/* ── Ruta animada del NNA (Mapa de Rutas) ───────────────────── */
+.ruta-anim-head {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #F47C00; border: 3px solid #fff;
+  box-shadow: 0 0 0 0 rgba(244,124,0,.55), 0 2px 8px rgba(0,0,0,.35);
+  animation: rutaAnimPulse 1.2s ease-out infinite;
+}
+@keyframes rutaAnimPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(244,124,0,.55), 0 2px 8px rgba(0,0,0,.35); }
+  100% { box-shadow: 0 0 0 18px rgba(244,124,0,0), 0 2px 8px rgba(0,0,0,.35); }
+}
+.ruta-anim-dot { animation: rutaAnimPop .45s cubic-bezier(.2,.9,.3,1.4) both; transform-box: fill-box; transform-origin: center; }
+@keyframes rutaAnimPop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.leaflet-tooltip.ruta-anim-tip {
+  background: #0E1726; color: #fff; border: none; border-radius: 8px;
+  padding: 6px 10px; font-size: 12px; line-height: 1.35; box-shadow: 0 6px 18px rgba(0,0,0,.28);
+}
+.leaflet-tooltip.ruta-anim-tip span { color: #F9B66B; font-weight: 600; }
+.leaflet-tooltip-top.ruta-anim-tip::before { border-top-color: #0E1726; }
+.ruta-anim-proj { animation: rutaAnimFade .8s ease-out both; }
+@keyframes rutaAnimFade { from { opacity: 0; } to { opacity: .65; } }
+.ruta-anim-replay {
+  background: #fff; color: #003B8F; border: 1.5px solid #B8CDEB; border-radius: 8px;
+  padding: 7px 12px; font: 600 12px Inter, sans-serif; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.ruta-anim-replay:hover { background: #ECF2FA; }
+@media (prefers-reduced-motion: reduce) {
+  .ruta-anim-head, .ruta-anim-dot, .ruta-anim-proj { animation: none; }
+}
